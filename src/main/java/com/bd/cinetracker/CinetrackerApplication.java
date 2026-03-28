@@ -1,5 +1,7 @@
 package com.bd.cinetracker;
 
+import com.bd.cinetracker.model.DTOs.FilmeDTO;
+import com.bd.cinetracker.model.DTOs.SerieDTO;
 import com.bd.cinetracker.service.OmdbService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -21,38 +23,53 @@ public class CinetrackerApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
         Scanner leitura = new Scanner(System.in);
-        var busca = "";
+        String busca = "";
 
         System.out.println("\n=== BEM-VINDO AO CINETRACKER ===");
 
         while (!busca.equalsIgnoreCase("sair")) {
-            System.out.println("Digite o nome do filme para buscar (ou 'sair'):");
+            System.out.println("\nDigite o nome (Filme ou Série) ou 'sair':");
             busca = leitura.nextLine();
 
-            if (busca.equalsIgnoreCase("sair")) {
-                break;
-            }
+            if (busca.equalsIgnoreCase("sair")) break;
 
             try {
-                var dados = omdbService.buscarFilme(busca);
+                Object resultado = omdbService.buscarMídia(busca);
 
-                if (dados.titulo() == null) {
-                    System.out.println("❌ Filme não encontrado na base do OMDb.");
-                } else {
-                    System.out.println("\n--- RESULTADO DA BUSCA ---");
-                    System.out.println("🎬 Título: " + dados.titulo());
-                    System.out.println("📅 Ano: " + dados.ano());
-                    System.out.println("⏳ Duração: " + dados.duracao());
-                    System.out.println("🌍 País: " + dados.pais());
-                    System.out.println("⭐ Avaliação (IMDb): " + dados.avaliacao());
-                    System.out.println("📝 Sinopse: " + dados.sinopse());
-                    System.out.println("--------------------------\n");
+                if (resultado == null) {
+                    System.out.println("❌ Não encontrado.");
+                } else if (resultado instanceof FilmeDTO filme) {
+                    imprimirFilme(filme);
+                } else if (resultado instanceof SerieDTO serie) {
+                    imprimirSerie(serie);
                 }
             } catch (Exception e) {
-                System.out.println("⚠️ Erro ao consultar a API: " + e.getMessage());
+                System.out.println("⚠️ Erro: " + e.getMessage());
             }
         }
+    }
 
-        System.out.println("Encerrando o Cinetracker... Até logo!");
+    private void imprimirFilme(FilmeDTO f) {
+        System.out.println("\n--- 🎬 FILME ENCONTRADO ---");
+        System.out.println("Título: " + f.titulo());
+        System.out.println("Ano: " + f.ano());
+        System.out.println("Duração: " + f.duracao());
+        System.out.println("Bilheteria: " + f.bilheteria());
+        System.out.println("Nota IMDb: " + f.notaImdb());
+        System.out.println("ID IMDb: " + f.imdbId());
+        System.out.println("Poster: " + f.posterUrl());
+        System.out.println("Sinopse: " + f.descricao());
+    }
+
+    private void imprimirSerie(SerieDTO s) {
+        System.out.println("\n--- 📺 SÉRIE ENCONTRADA ---");
+        System.out.println("Título: " + s.titulo());
+        System.out.println("Temporadas: " + s.qtdTemporadas());
+        System.out.println("Ano: " + s.ano());
+        System.out.println("Duração Episódio: " + s.duracaoEpisodio());
+        System.out.println("Nota IMDb: " + s.notaImdb());
+        System.out.println("ID IMDb: " + s.imdbId());
+        System.out.println("Poster: " + s.posterUrl());
+        System.out.println("Sinopse: " + s.descricao());
     }
 }
