@@ -58,4 +58,14 @@ INSERT INTO FILME (
 
 ('tt6751668', 'Parasite', 'https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg', 'A ganância e a discriminação de classe ameaçam a recém-formada relação simbiótica entre a rica família Park e o clã Kim, que vive na pobreza.', 53369749.0, 132, 2019, 'Coreia do Sul', 8.5),
 
-('tt0101414', 'Beauty and the Beast', 'https://m.media-amazon.com/images/M/MV5BYTY3NDg2YzktYWFjZC00MTExLTlmZDctMGY3MWYzZTlkYTNiXkEyXkFqcGc@._V1_SX300.jpg', 'Um príncipe amaldiçoado a passar seus dias como um monstro hediondo parte em busca de recuperar sua humanidade ao conquistar o amor de uma jovem mulher.', 218967620.0, 84, 1991, 'EUA', 8.0);
+('tt0101414', 'Beauty and the Beast', 'https://m.media-amazon.com/images/M/MV5BYTY3NDg2YzktYWFjZC00MTExLTlmZDctMGY3MWYzZTlkYTNiXkEyXkFqcGc@._V1_SX300.jpg', 'Um príncipe amaldiçoado a passar seus dias como um monstro hediondo parte em busca de recuperar sua humanidade ao conquistar o amor de uma jovem mulher.', 218967620.0, 84, 1991, 'EUA', 8.0),
+
+('tt31193180', 'Sinners', 'https://m.media-amazon.com/images/M/MV5BNjIwZWY4ZDEtMmIxZS00NDA4LTg4ZGMtMzUwZTYyNzgxMzk5XkEyXkFqcGc@._V1_SX300.jpg', 'Tentando deixar suas vidas conturbadas para trás, irmãos gêmeos retornam à sua cidade natal para recomeçar, apenas para descobrir que um mal ainda maior está esperando para recebê-los de volta.', 279989632.0, 137, 2025, 'EUA', 7.5),
+
+('tt0109830', 'Forrest Gump', 'https://m.media-amazon.com/images/M/MV5BNDYwNzVjMTItZmU5YS00YjQ5LTljYjgtMjY2NDVmYWMyNWFmXkEyXkFqcGc@._V1_SX300.jpg', 'A história dos Estados Unidos desde a década de 1950 até os anos 70 se desenrola sob a perspectiva de um homem do Alabama com um QI de 75, que anseia por se reunir com sua namorada de infância.', 330455270.0, 142, 1994, 'EUA', 8.8),
+
+('tt0137523', 'Fight Club', 'https://m.media-amazon.com/images/M/MV5BOTgyOGQ1NDItNGU3Ny00MjU3LTg2YWEtNmEyYjBiMjI1Y2M5XkEyXkFqcGc@._V1_SX300.jpg', 'Um funcionário de escritório insone e um fabricante de sabão despojado formam um clube de luta clandestino que evolui para algo muito mais.', 37030102.0, 139, 1999, 'EUA', 8.8),
+
+('tt0468569', 'The Dark Knight', 'https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg', 'Quando uma ameaça conhecida como Coringa causa estragos e caos no povo de Gotham, Batman, James Gordon e Harvey Dent devem trabalhar juntos para acabar com a loucura.', 534987076.0, 152, 2008, 'EUA', 9.1),
+
+('tt0068646', 'The Godfather', 'https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_SX300.jpg', 'O patriarca idoso de uma dinastia do crime organizado transfere o controle de seu império clandestino para seu filho relutante.', 136381073.0, 175, 1972, 'EUA', 9.2);
