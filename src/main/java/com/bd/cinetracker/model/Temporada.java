@@ -3,6 +3,7 @@ package com.bd.cinetracker.model;
 public class Temporada {
     private Integer idTemporada;
     private Integer fkSerieId;
+    private Integer numTemporada;
 
     public Temporada() {}
 
@@ -25,5 +26,13 @@ public class Temporada {
 
     public void setFkSerieId(Integer fkSerieId) {
         this.fkSerieId = fkSerieId;
+    }
+
+    public Integer getNumTemporada() {
+        return numTemporada;
+    }
+
+    public void setNumTemporada(Integer numTemporada) {
+        this.numTemporada = numTemporada;
     }
 }

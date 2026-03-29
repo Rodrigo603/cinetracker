@@ -29,8 +29,8 @@ public class UsuarioRepository {
         Integer idTelefone = keyHolder.getKey().intValue();
 
         String sqlUsuario = """
-            INSERT INTO USUARIO (NOME, EMAIL, SENHA, DT_CADASTRO, FK_TELEFONE_TELEFONE_PK, IS_ADMIN) 
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO USUARIO (NOME, EMAIL, SENHA, DT_CADASTRO, FK_TELEFONE_TELEFONE_PK) 
+            VALUES (?, ?, ?, ?, ?)
         """;
 
         jdbcTemplate.update(sqlUsuario,
@@ -38,8 +38,7 @@ public class UsuarioRepository {
                 usuario.getEmail(),
                 usuario.getSenha(),
                 usuario.getDataCadastro(),
-                idTelefone,
-                usuario.getAdmin()
+                idTelefone
         );
     }
 
@@ -51,14 +50,26 @@ public class UsuarioRepository {
                 rs.getString("EMAIL"),
                 rs.getString("SENHA"),
                 rs.getDate("DT_CADASTRO").toLocalDate(),
-                rs.getInt("FK_TELEFONE_TELEFONE_PK"),
-                rs.getBoolean("IS_ADMIN")
+                rs.getInt("FK_TELEFONE_TELEFONE_PK")
         ), id);
     }
 
-    public int atualizarPerfil(Usuario usuario) {
-        String sql = "UPDATE USUARIO SET NOME = ?, SENHA = ? WHERE ID_USER = ?";
-        return jdbcTemplate.update(sql, usuario.getNome(), usuario.getSenha(), usuario.getId());
+    public void atualizarPerfilCompleto(Usuario usuario, String novoTelefone) {
+        String sqlUsuario = "UPDATE USUARIO SET NOME = ?, EMAIL = ?, SENHA = ? WHERE ID_USER = ?";
+        jdbcTemplate.update(sqlUsuario,
+                usuario.getNome(),
+                usuario.getEmail(),
+                usuario.getSenha(),
+                usuario.getId()
+        );
+
+        if (usuario.getFkTelefone() != null && novoTelefone != null) {
+            String sqlTelefone = "UPDATE TELEFONE SET TELEFONE = ? WHERE TELEFONE_PK = ?";
+            jdbcTemplate.update(sqlTelefone,
+                    novoTelefone,
+                    usuario.getFkTelefone()
+            );
+        }
     }
 
     public int deletar(Integer id) {

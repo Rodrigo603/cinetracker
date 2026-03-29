@@ -1,22 +1,19 @@
 package com.bd.cinetracker.model;
 
-
 import java.time.LocalDate;
-import java.util.Objects;
 
-public class Usuario {
-    private Integer id;
+public class Admin {
+    private Integer idAdmin;
     private String nome;
     private String email;
     private String senha;
     private LocalDate dataCadastro;
     private Integer fkTelefone;
 
-    public Usuario() {}
+    public Admin() {}
 
-
-    public Usuario(Integer id, String nome, String email, String senha, LocalDate dataCadastro, Integer fkTelefone) {
-        this.id = id;
+    public Admin(Integer idAdmin, String nome, String email, String senha, LocalDate dataCadastro, Integer fkTelefone) {
+        this.idAdmin = idAdmin;
         this.nome = nome;
         this.email = email;
         this.senha = senha;
@@ -24,12 +21,12 @@ public class Usuario {
         this.fkTelefone = fkTelefone;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getIdAdmin() {
+        return idAdmin;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setIdAdmin(Integer idAdmin) {
+        this.idAdmin = idAdmin;
     }
 
     public String getNome() {
@@ -71,18 +68,4 @@ public class Usuario {
     public void setFkTelefone(Integer fkTelefone) {
         this.fkTelefone = fkTelefone;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Usuario usuario = (Usuario) o;
-        return Objects.equals(getId(), usuario.getId()) && Objects.equals(getEmail(), usuario.getEmail());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getEmail());
-    }
 }
-
-
