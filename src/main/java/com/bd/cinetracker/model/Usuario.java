@@ -11,17 +11,19 @@ public class Usuario {
     private String senha;
     private LocalDate dataCadastro;
     private Integer fkTelefone;
+    private Boolean isAdmin = false;
 
     public Usuario() {}
 
 
-    public Usuario(Integer id, String nome, String email, String senha, LocalDate dataCadastro, Integer fkTelefone) {
+    public Usuario(Integer id, String nome, String email, String senha, LocalDate dataCadastro, Integer fkTelefone,Boolean isAdmin) {
         this.id = id;
         this.nome = nome;
         this.email = email;
         this.senha = senha;
         this.dataCadastro = dataCadastro;
         this.fkTelefone = fkTelefone;
+        this.isAdmin = isAdmin;
     }
 
     public Integer getId() {
@@ -64,26 +66,32 @@ public class Usuario {
         this.dataCadastro = dataCadastro;
     }
 
-    public int getFkTelefone() {
+    public Integer getFkTelefone() {
         return fkTelefone;
     }
 
-    public void setFkTelefone(int fkTelefone) {
+    public void setFkTelefone(Integer fkTelefone) {
         this.fkTelefone = fkTelefone;
+    }
+
+    public Boolean getAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Usuario usuario = (Usuario) o;
-        return getFkTelefone() == usuario.getFkTelefone() && Objects.equals(getId(), usuario.getId()) && Objects.equals(getNome(),
-                usuario.getNome()) && Objects.equals(getEmail(), usuario.getEmail()) && Objects.equals(getSenha(),
-                usuario.getSenha()) && Objects.equals(getDataCadastro(), usuario.getDataCadastro());
+        return Objects.equals(getId(), usuario.getId()) && Objects.equals(getEmail(), usuario.getEmail());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getNome(), getEmail(), getSenha(), getDataCadastro(), getFkTelefone());
+        return Objects.hash(getId(), getEmail());
     }
 }
 
