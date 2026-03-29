@@ -1,4 +1,4 @@
-package com.bd.cinetracker.model.DTOs;
+package com.bd.cinetracker.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

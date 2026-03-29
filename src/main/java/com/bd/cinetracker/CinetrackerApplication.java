@@ -1,7 +1,7 @@
 package com.bd.cinetracker;
 
-import com.bd.cinetracker.model.DTOs.FilmeDTO;
-import com.bd.cinetracker.model.DTOs.SerieDTO;
+import com.bd.cinetracker.DTOs.FilmeDTO;
+import com.bd.cinetracker.DTOs.SerieDTO;
 import com.bd.cinetracker.service.OmdbService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;

@@ -1,7 +1,7 @@
 package com.bd.cinetracker.service;
 
-import com.bd.cinetracker.model.DTOs.FilmeDTO;
-import com.bd.cinetracker.model.DTOs.SerieDTO;
+import com.bd.cinetracker.DTOs.FilmeDTO;
+import com.bd.cinetracker.DTOs.SerieDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
