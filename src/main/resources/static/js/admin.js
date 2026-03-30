@@ -11,20 +11,42 @@ async function carregarCatalogo() {
     if (!res.ok) return;
 
     filmesCatalogo = await res.json();
-    const tbody  = document.getElementById('listaFilmesTbody');
+    renderizarTabela(filmesCatalogo);
+}
+
+
+function renderizarTabela(lista) {
+    const tbody = document.getElementById('listaFilmesTbody');
+    const msgVazia = document.getElementById('msgBuscaVazia');
     tbody.innerHTML = '';
 
-    filmesCatalogo.forEach(f => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${f.idMidia}</td>
-            <td>${f.titulo}</td>
-            <td class="action-buttons">
-                <button class="btn-small btn-edit" onclick="prepararEdicao(${f.idMidia})">Editar</button>
-                <button class="btn-small btn-danger" onclick="deletarMidia(${f.idMidia})">Excluir</button>
-            </td>`;
-        tbody.appendChild(tr);
-    });
+    if (lista.length === 0) {
+        msgVazia.style.display = 'block';
+    } else {
+        msgVazia.style.display = 'none';
+        lista.forEach(f => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${f.idMidia}</td>
+                <td>${f.titulo}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-small btn-edit" onclick="prepararEdicao(${f.idMidia})">Editar</button>
+                        <button class="btn-small btn-danger" onclick="deletarMidia(${f.idMidia})">Excluir</button>
+                    </div>
+                </td>`;
+            tbody.appendChild(tr);
+        });
+    }
+}
+
+
+function filtrarFilmes() {
+    const termo = document.getElementById('inputBuscaFilme').value.toLowerCase();
+    const filtrados = filmesCatalogo.filter(f =>
+        f.titulo.toLowerCase().includes(termo)
+    );
+    renderizarTabela(filtrados);
 }
 
 async function adicionarMidia(event) {
@@ -59,7 +81,9 @@ function prepararEdicao(id) {
     document.getElementById('editTitulo').value = filme.titulo;
     document.getElementById('editDescricao').value = filme.descricao || '';
     document.getElementById('editPoster').value = filme.posterUrl || '';
-    document.getElementById('editDuracao').value = filme.duracao || 0;
+
+
+    document.getElementById('editDuracao').value = filme.duracao || 1;
     document.getElementById('editBilheteria').value = filme.bilheteria || 0;
 
     document.getElementById('form-midia-container').classList.add('hidden');
@@ -79,8 +103,8 @@ async function salvarEdicao(event) {
         titulo: document.getElementById('editTitulo').value,
         descricao: document.getElementById('editDescricao').value,
         posterUrl: document.getElementById('editPoster').value,
-        duracao: document.getElementById('editDuracao').value,
-        bilheteria: document.getElementById('editBilheteria').value
+        duracao: parseInt(document.getElementById('editDuracao').value) || 1,
+        bilheteria: parseInt(document.getElementById('editBilheteria').value) || 0
     };
 
     try {
