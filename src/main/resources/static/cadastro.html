@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro - CineTracker</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-body">
+<div class="auth-box">
+    <h1>Cadastrar</h1>
+    <form onsubmit="fazerCadastro(event)">
+        <div class="input-group"><input type="text" id="nome" placeholder="Nome completo" required></div>
+        <div class="input-group"><input type="email" id="email" placeholder="Email" required></div>
+        <div class="input-group"><input type="tel" id="telefone" placeholder="Telefone" required></div>
+        <div class="input-group"><input type="password" id="senha" placeholder="Senha" required></div>
+        <button type="submit" class="btn-primary">Finalizar Cadastro</button>
+    </form>
+    <div class="auth-switch">
+        Já tem uma conta? <a href="index.html">Faça login.</a>
+    </div>
+</div>
+<script>
+    async function fazerCadastro(event) {
+        event.preventDefault();
+        const email = document.getElementById('email').value;
+        const isAdmin = email.toLowerCase().includes('admin');
+        const endpoint = isAdmin ? '/admin/novo-admin' : '/usuarios/cadastrar';
+        const payload = {
+            nome: document.getElementById('nome').value,
+            email: email,
+            telefone: document.getElementById('telefone').value,
+            senha: document.getElementById('senha').value
+        };
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if(response.ok) {
+                alert(isAdmin ? "Administrador cadastrado!" : "Usuário cadastrado!");
+                window.location.href = 'index.html';
+            }
+        } catch (error) {
+            alert("Erro ao conectar com o servidor.");
+        }
+    }
+</script>
+</body>
+</html>

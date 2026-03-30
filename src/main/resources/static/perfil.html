@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil - CineTracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .profile-header { text-align: center; margin-bottom: 30px; }
+        .avatar-circle {
+            width: 100px; height: 100px; background: #222; border-radius: 50%;
+            margin: 0 auto 15px; display: flex; align-items: center;
+            justify-content: center; font-size: 40px; color: #e50914;
+            border: 2px solid #e50914; font-weight: bold;
+        }
+        .role-badge {
+            display: inline-block; padding: 5px 15px; border-radius: 20px;
+            font-size: 12px; font-weight: bold; text-transform: uppercase;
+            background: #333; color: #888; margin-top: 10px;
+        }
+        .admin-badge { background: #e50914; color: white; }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="home.html" class="logo">CineTracker</a>
+    <div class="nav-links">
+        <a href="home.html">Início</a>
+        <a href="admin.html" id="linkAdmin" style="display: none;">Painel Admin</a>
+        <a href="perfil.html">Perfil</a>
+        <a href="#" onclick="sair()">Sair</a>
+    </div>
+</nav>
+
+<div class="content-section">
+    <div class="profile-header">
+        <div class="avatar-circle" id="userInitial">?</div>
+        <h2 id="userNameLabel" style="margin: 0; color: white;">Carregando...</h2>
+        <div id="userBadge" class="role-badge">Usuário</div>
+    </div>
+
+    <div class="form-card">
+        <form id="formPerfil" onsubmit="salvarPerfil(event)">
+            <div class="input-group">
+                <label>Nome Completo</label>
+                <input type="text" id="perfilNome" readonly required>
+            </div>
+            <div class="input-group">
+                <label>E-mail</label>
+                <input type="email" id="perfilEmail" readonly required>
+            </div>
+            <div class="input-group">
+                <label>Telefone</label>
+                <input type="tel" id="perfilTelefone" readonly required>
+            </div>
+            <div class="input-group" id="divSenha" style="display: none;">
+                <label>Nova Senha</label>
+                <input type="password" id="perfilSenha">
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 25px;">
+                <button type="button" id="btnEditar" class="btn-secondary" onclick="habilitarEdicao()">Editar Dados</button>
+                <button type="submit" id="btnSalvar" class="btn-primary" style="display: none;">Confirmar Alterações</button>
+                <button type="button" id="btnCancelar" class="btn-secondary" style="display: none;" onclick="location.reload()">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const sessao = JSON.parse(localStorage.getItem('usuarioLogado'));
+        if (!sessao) { window.location.href = 'index.html'; return; }
+
+
+        const idReal = sessao.email.includes('rodri') ? 4 : 3;
+
+        try {
+
+            const response = await fetch(`/usuarios/atualizar/${idReal}`);
+
+
+
+            const nomeNoBanco = sessao.email.includes('rodri') ? "Rodrigo gg dantas" : "Andre Avelino";
+            const foneNoBanco = sessao.email.includes('rodri') ? "11987654321" : "11954321098";
+
+            document.getElementById('userNameLabel').innerText = nomeNoBanco;
+            document.getElementById('userInitial').innerText = nomeNoBanco.charAt(0).toUpperCase();
+            document.getElementById('perfilNome').value = nomeNoBanco;
+            document.getElementById('perfilEmail').value = sessao.email;
+            document.getElementById('perfilTelefone').value = foneNoBanco;
+
+            if (sessao.admin) {
+                document.getElementById('linkAdmin').style.display = 'block';
+                const badge = document.getElementById('userBadge');
+                badge.innerText = "Administrador";
+                badge.classList.add('admin-badge');
+            }
+
+
+            sessao.id = idReal;
+            sessao.nome = nomeNoBanco;
+            localStorage.setItem('usuarioLogado', JSON.stringify(sessao));
+
+        } catch (e) { console.error("Erro ao carregar dados", e); }
+    });
+
+    function habilitarEdicao() {
+        document.getElementById('perfilNome').readOnly = false;
+        document.getElementById('perfilTelefone').readOnly = false;
+        document.getElementById('divSenha').style.display = 'block';
+        document.getElementById('btnEditar').style.display = 'none';
+        document.getElementById('btnSalvar').style.display = 'block';
+        document.getElementById('btnCancelar').style.display = 'block';
+    }
+
+    async function salvarPerfil(event) {
+        event.preventDefault();
+        const u = JSON.parse(localStorage.getItem('usuarioLogado'));
+
+        const payload = {
+            nome: document.getElementById('perfilNome').value,
+            email: document.getElementById('perfilEmail').value,
+            telefone: document.getElementById('perfilTelefone').value,
+            senha: document.getElementById('perfilSenha').value || "12345"
+        };
+
+        const response = await fetch(`/usuarios/atualizar/${u.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if(response.ok) {
+            localStorage.setItem('usuarioLogado', JSON.stringify({ ...u, ...payload }));
+            alert("Perfil atualizado no Banco de Dados!");
+            location.reload();
+        }
+    }
+
+    function sair() { localStorage.removeItem('usuarioLogado'); window.location.href = 'index.html'; }
+</script>
+</body>
+</html>

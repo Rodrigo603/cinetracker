@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Administrativo - CineTracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .admin-grid { display: flex; flex-direction: column; gap: 30px; }
+        .action-buttons { display: flex; gap: 10px; }
+        .hidden { display: none; }
+        .form-section { border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; }
+        /* Destaque para edição dinâmica */
+        .editing-mode { border: 2px solid #e50914 !important; box-shadow: 0 0 20px rgba(229, 9, 20, 0.2); }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="home.html" class="logo">CineTracker</a>
+    <div class="nav-links">
+        <a href="home.html">Início</a>
+        <a href="admin.html">Painel Admin</a>
+        <a href="perfil.html">Perfil</a>
+        <a href="#" onclick="sair()">Sair</a>
+    </div>
+</nav>
+
+<div class="content-section admin-grid">
+
+
+    <div class="form-card" id="form-midia-container">
+        <h2 id="titulo-form-midia">Gerenciar Catálogo de Filmes</h2>
+        <form id="formMidia" onsubmit="salvarMidia(event)">
+            <input type="hidden" id="idMidia">
+            <div class="input-group">
+                <label>Título do Filme</label>
+                <input type="text" id="tituloMedia" required>
+            </div>
+            <div class="input-group">
+                <label>ID IMDb (tt...)</label>
+                <input type="text" id="imdbIdMedia" required>
+            </div>
+            <div class="input-group">
+                <label>URL do Poster</label>
+                <input type="text" id="posterMedia" required>
+            </div>
+            <div class="action-buttons">
+                <button type="submit" class="btn-primary" id="btn-salvar-midia">Salvar Filme</button>
+                <button type="button" class="btn-secondary hidden" id="btn-cancelar-edicao" onclick="cancelarEdicaoMidia()">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+
+    <div class="form-card">
+        <h2>Filmes Cadastrados</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody id="listaFilmesTbody"></tbody>
+        </table>
+    </div>
+
+
+    <div class="form-card form-section">
+        <h2>Adicionar Novo Administrador</h2>
+        <form onsubmit="criarNovoAdmin(event)">
+            <div class="input-group"><label>Nome Completo</label><input type="text" id="nomeAdmin" required></div>
+            <div class="input-group"><label>E-mail (deve conter 'admin')</label><input type="email" id="emailAdmin" required></div>
+            <div class="input-group"><label>Telefone</label><input type="tel" id="telAdmin" required></div>
+            <div class="input-group"><label>Senha</label><input type="password" id="senhaAdmin" required></div>
+            <button type="submit" class="btn-primary">Cadastrar Administrador</button>
+        </form>
+    </div>
+
+
+    <div class="form-card">
+        <h2>Remover Conta do Sistema</h2>
+        <p style="color: #888; font-size: 14px; margin-bottom: 15px;">Remova administradores ou usuários comuns permanentemente através do ID.</p>
+        <div style="display: flex; gap: 10px;">
+            <input type="number" id="idUsuarioExcluir" placeholder="Digite o ID (Ex: 4)" style="flex: 1; padding: 12px; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 4px;">
+            <button class="btn-primary" style="background-color: #e50914; width: auto; padding: 0 25px;" onclick="excluirUsuario()">Excluir Permanentemente</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const u = JSON.parse(localStorage.getItem('usuarioLogado'));
+        if (!u || !u.admin) { window.location.href = 'home.html'; return; }
+        carregarCatalogo();
+    });
+
+
+    async function carregarCatalogo() {
+        const res = await fetch('/filmes');
+        if(res.ok) {
+            const filmes = await res.json();
+            const tbody = document.getElementById('listaFilmesTbody');
+            tbody.innerHTML = '';
+            filmes.forEach(f => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${f.idMidia}</td>
+                    <td>${f.titulo}</td>
+                    <td class="action-buttons">
+                        <button class="btn-small btn-edit" onclick="prepararEdicao('${f.idMidia}','${f.idImdb}','${f.titulo}','${f.posterUrl}')">Editar</button>
+                        <button class="btn-small btn-danger" onclick="deletarMidia('${f.idMidia}')">Excluir</button>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+
+
+    function prepararEdicao(id, imdb, titulo, poster) {
+        document.getElementById('idMidia').value = id;
+        document.getElementById('tituloMedia').value = titulo;
+        document.getElementById('imdbIdMedia').value = imdb;
+        document.getElementById('posterMedia').value = poster;
+
+        const container = document.getElementById('form-midia-container');
+        document.getElementById('titulo-form-midia').innerText = "Editando Filme: " + titulo;
+        document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
+
+
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        container.classList.add('editing-mode');
+        setTimeout(() => container.classList.remove('editing-mode'), 2000);
+    }
+
+
+    async function salvarMidia(event) {
+        event.preventDefault();
+        const id = document.getElementById('idMidia').value;
+        const payload = {
+            titulo: document.getElementById('tituloMedia').value,
+            idImdb: document.getElementById('imdbIdMedia').value,
+            posterUrl: document.getElementById('posterMedia').value
+        };
+        const url = id ? `/admin/filmes/${id}` : '/admin/filmes';
+        const res = await fetch(url, {
+            method: id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if(res.ok) {
+            cancelarEdicaoMidia();
+            carregarCatalogo();
+        }
+    }
+
+    function cancelarEdicaoMidia() {
+        document.getElementById('formMidia').reset();
+        document.getElementById('idMidia').value = "";
+        document.getElementById('titulo-form-midia').innerText = "Gerenciar Catálogo de Filmes";
+        document.getElementById('btn-cancelar-edicao').classList.add('hidden');
+    }
+
+
+    async function criarNovoAdmin(event) {
+        event.preventDefault();
+        const payload = {
+            nome: document.getElementById('nomeAdmin').value,
+            email: document.getElementById('emailAdmin').value,
+            telefone: document.getElementById('telAdmin').value,
+            senha: document.getElementById('senhaAdmin').value
+        };
+        const res = await fetch('/admin/novo-admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if(res.ok) {
+            alert("Sucesso: Novo administrador cadastrado!");
+            event.target.reset();
+        }
+    }
+
+
+    async function excluirUsuario() {
+        const id = document.getElementById('idUsuarioExcluir').value;
+        if(!id) { alert("Por favor, insira um ID válido."); return; }
+        if(!confirm(`Deseja realmente excluir permanentemente o ID ${id}?`)) return;
+
+        const res = await fetch(`/admin/usuarios/${id}`, { method: 'DELETE' });
+        if(res.ok) {
+            alert("Usuário/Admin removido com sucesso!");
+            document.getElementById('idUsuarioExcluir').value = '';
+        } else {
+            alert("Erro ao excluir. Verifique se o ID existe no banco de dados.");
+        }
+    }
+
+    async function deletarMidia(id) {
+        if(confirm("Excluir filme do catálogo?")) {
+            await fetch(`/admin/filmes/${id}`, { method: 'DELETE' });
+            carregarCatalogo();
+        }
+    }
+
+    function sair() { localStorage.removeItem('usuarioLogado'); window.location.href = 'index.html'; }
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - CineTracker</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-body">
+<div class="auth-box">
+    <h1>Entrar</h1>
+    <form onsubmit="fazerLogin(event)">
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Email" required>
+        </div>
+        <div class="input-group">
+            <input type="password" id="senha" placeholder="Senha" required>
+        </div>
+        <button type="submit" class="btn-primary">Entrar</button>
+    </form>
+    <div class="auth-switch">
+        Novo por aqui? <a href="cadastro.html">Cadastre-se agora.</a>
+    </div>
+</div>
+<script>
+    function fazerLogin(event) {
+        event.preventDefault();
+        const email = document.getElementById('email').value;
+        const isAdmin = email.toLowerCase().includes('admin');
+
+
+        const sessao = {
+            email: email,
+            admin: isAdmin
+        };
+
+        localStorage.setItem('usuarioLogado', JSON.stringify(sessao));
+        window.location.href = 'home.html';
+    }
+</script>
+</body>
+</html>
