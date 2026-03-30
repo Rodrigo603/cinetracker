@@ -73,15 +73,15 @@
         if (!sessao || !sessao.id) { window.location.href = 'index.html'; return; }
 
         try {
-            /*
-             * FIX: sempre busca os dados frescos do servidor usando o id da
-             * sessão. Antes, o perfil podia exibir dados de outro usuário
-             * porque o localStorage ficava desatualizado após o cadastro.
-             */
-            const response = await API.buscarUsuario(sessao.id);
+            let response;
+
+            if (sessao.admin) {
+                response = await API.buscarAdmin(sessao.id);
+            } else {
+                response = await API.buscarUsuario(sessao.id);
+            }
 
             if (!response.ok) {
-                console.error("Usuário não encontrado no servidor.");
                 return;
             }
 
@@ -100,11 +100,10 @@
                 badge.classList.add('admin-badge');
             }
 
-            // Mantém sessão sincronizada com dados reais do banco
             API.setSessao({ ...sessao, nome: usuario.nome, email: usuario.email });
 
         } catch (e) {
-            console.error("Erro ao carregar dados do perfil", e);
+            console.error(e);
         }
     });
 
@@ -123,12 +122,6 @@
 
         const novaSenha = document.getElementById('perfilSenha').value;
 
-        /*
-         * FIX: não tenta ler sessao.senha (que nunca existiu no localStorage).
-         * Se o campo senha estiver vazio, envia string vazia — o backend deve
-         * ignorar e manter a senha atual. Se precisar enviar a senha antiga,
-         * adicione um campo "senha atual" no formulário.
-         */
         const payload = {
             nome:      document.getElementById('perfilNome').value,
             email:     document.getElementById('perfilEmail').value,
@@ -137,19 +130,23 @@
         };
 
         try {
-            const response = await API.atualizarUsuario(sessao.id, payload);
+            let response;
+
+            if (sessao.admin) {
+                response = await API.atualizarAdmin(sessao.id, payload);
+            } else {
+                response = await API.atualizarUsuario(sessao.id, payload);
+            }
 
             if (response.ok) {
-                // Atualiza sessão com novo nome/email
                 API.setSessao({ ...sessao, nome: payload.nome, email: payload.email });
                 alert("Perfil atualizado com sucesso!");
                 location.reload();
             } else {
-                alert("Erro ao atualizar perfil. Tente novamente.");
+                alert("Erro ao atualizar perfil.");
             }
         } catch (e) {
-            console.error("Erro na requisição de atualização", e);
-            alert("Erro de conexão. Tente novamente.");
+            alert("Erro de conexão.");
         }
     }
 </script>

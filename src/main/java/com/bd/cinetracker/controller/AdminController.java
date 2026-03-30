@@ -33,9 +33,8 @@ public class AdminController {
 
     public record AdminRequest(String nome, String email, String senha, String telefone) {}
     public record AdminLoginResponse(Integer id, String nome, String email, boolean admin) {}
-
-    // Novo Record para receber apenas o título do front-end
     public record NovoFilmeRequest(String titulo) {}
+    public record AdminResponse(Integer id, String nome, String email, String telefone) {}
 
     @PostMapping("/novo-admin")
     public ResponseEntity<String> criarAdmin(@RequestBody AdminRequest request) {
@@ -47,6 +46,35 @@ public class AdminController {
 
         adminRepository.cadastrarComTelefone(novoAdmin, request.telefone());
         return ResponseEntity.ok("Novo administrador criado com sucesso!");
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AdminResponse> buscarAdminPorId(@PathVariable Integer id) {
+        Admin a = adminRepository.buscarPorId(id);
+        if (a == null) return ResponseEntity.notFound().build();
+
+        String telefone = adminRepository.buscarTelefonePorFk(a.getFkTelefone());
+        return ResponseEntity.ok(new AdminResponse(a.getIdAdmin(), a.getNome(), a.getEmail(), telefone));
+    }
+
+    @PutMapping("/atualizar/{id}")
+    public ResponseEntity<String> atualizarPerfilAdmin(@PathVariable Integer id, @RequestBody AdminRequest request) {
+        Admin adminExistente = adminRepository.buscarPorId(id);
+
+        if (adminExistente == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        adminExistente.setNome(request.nome());
+        adminExistente.setEmail(request.email());
+
+        if (request.senha() != null && !request.senha().trim().isEmpty()) {
+            adminExistente.setSenha(request.senha());
+        }
+
+        adminRepository.atualizarPerfilCompleto(adminExistente, request.telefone());
+
+        return ResponseEntity.ok("Perfil atualizado com sucesso!");
     }
 
     @DeleteMapping("/usuarios/{id}")
@@ -89,14 +117,14 @@ public class AdminController {
                     filme.setBilheteria(Double.parseDouble(limpaBilheteria));
                 }
             } catch (Exception e) {
-                System.out.println("Erro ao converter números do OMDb: " + e.getMessage());
+                System.out.println(e.getMessage());
             }
 
             filmeRepository.salvar(filme);
-            return ResponseEntity.ok("Filme '" + filme.getTitulo() + "' adicionado ao catálogo com sucesso!");
+            return ResponseEntity.ok("Filme adicionado ao catálogo com sucesso!");
         }
 
-        return ResponseEntity.badRequest().body("O título buscado não é um filme (poderá ser uma série).");
+        return ResponseEntity.badRequest().body("O título buscado não é um filme.");
     }
 
     @PutMapping("/filmes/{id}")

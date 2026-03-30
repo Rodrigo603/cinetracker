@@ -68,6 +68,14 @@ const API = (() => {
         return _request('POST', '/admin/novo-admin', payload);
     }
 
+    async function buscarAdmin(id) {
+        return _request('GET', `/admin/${id}`);
+    }
+
+    async function atualizarAdmin(id, payload) {
+        return _request('PUT', `/admin/atualizar/${id}`, payload);
+    }
+
     return {
         getSessao,
         setSessao,
@@ -82,6 +90,8 @@ const API = (() => {
         criarFilme,
         atualizarFilme,
         deletarFilme,
-        criarAdmin
+        criarAdmin,
+        buscarAdmin,
+        atualizarAdmin
     };
 })();

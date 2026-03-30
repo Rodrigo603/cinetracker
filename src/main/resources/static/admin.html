@@ -189,7 +189,7 @@
         event.preventDefault();
         const id = document.getElementById('editIdMidia').value;
 
-        // Mantemos a duração e bilheteria originais ocultas para não perdê-las na atualização
+
         const payload = {
             titulo: document.getElementById('editTitulo').value,
             descricao: document.getElementById('editDescricao').value,
@@ -219,7 +219,7 @@
         document.getElementById('form-midia-container').classList.remove('hidden');
     }
 
-    // ── Outras Funções Admin ─────────────────────────────────
+
     async function criarNovoAdmin(event) {
         event.preventDefault();
         const payload = {
