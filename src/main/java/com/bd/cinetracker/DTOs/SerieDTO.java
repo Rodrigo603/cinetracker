@@ -1,18 +1,18 @@
 package com.bd.cinetracker.DTOs;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record SerieDTO(
-        @JsonAlias("Title") String titulo,
-        @JsonAlias("Year") String ano,
-        @JsonAlias("Plot") String descricao,
-        @JsonAlias("imdbRating") String notaImdb,
-        @JsonAlias("totalSeasons") String qtdTemporadas, // Campo específico de série
-        @JsonAlias("Runtime") String duracaoEpisodio,
-        @JsonAlias("Country") String pais,
-        @JsonAlias("imdbID") String imdbId,
-        @JsonAlias("Poster") String posterUrl,
-        @JsonAlias("Type") String tipo
+        @JsonProperty("Title") String titulo,
+        @JsonProperty("Year") String ano,
+        @JsonProperty("Plot") String descricao,
+        @JsonProperty("imdbRating") String notaImdb,
+        @JsonProperty("totalSeasons") String qtdTemporadas,
+        @JsonProperty("Runtime") String duracaoEpisodio,
+        @JsonProperty("Country") String pais,
+        @JsonProperty("imdbID") String imdbId,
+        @JsonProperty("Poster") String posterUrl,
+        @JsonProperty("Type") String tipo
 ) {}

@@ -10,6 +10,8 @@
         .hidden { display: none; }
         .form-section { border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; }
         .editing-mode { border: 2px solid #e50914 !important; box-shadow: 0 0 20px rgba(229, 9, 20, 0.2); }
+        textarea.custom-textarea { width: 100%; padding: 16px; background-color: #2b2b2b; border: 1px solid transparent; border-radius: 6px; color: #fff; font-size: 16px; margin-top: 5px; resize: vertical; font-family: inherit; }
+        textarea.custom-textarea:focus { outline: none; border: 1px solid #e50914; background-color: #333; }
     </style>
 </head>
 <body>
@@ -25,31 +27,45 @@
 
 <div class="content-section admin-grid">
 
-    <!-- Formulário de filme (criar / editar) -->
     <div class="form-card" id="form-midia-container">
-        <h2 id="titulo-form-midia">Gerenciar Catálogo de Filmes</h2>
-        <form id="formMidia" onsubmit="salvarMidia(event)">
-            <input type="hidden" id="idMidia">
+        <h2 id="titulo-form-midia">Buscar e Adicionar Filme</h2>
+        <form id="formMidia" onsubmit="adicionarMidia(event)">
             <div class="input-group">
-                <label>Título do Filme</label>
-                <input type="text" id="tituloMedia" required>
-            </div>
-            <div class="input-group">
-                <label>ID IMDb (tt...)</label>
-                <input type="text" id="imdbIdMedia" required>
-            </div>
-            <div class="input-group">
-                <label>URL do Poster</label>
-                <input type="text" id="posterMedia" required>
+                <label>Qual filme pretende adicionar? (Busca automática no OMDb)</label>
+                <input type="text" id="tituloMedia" placeholder="Ex: The Matrix" required>
             </div>
             <div class="action-buttons">
-                <button type="submit" class="btn-primary" id="btn-salvar-midia">Salvar Filme</button>
-                <button type="button" class="btn-secondary hidden" id="btn-cancelar-edicao" onclick="cancelarEdicaoMidia()">Cancelar</button>
+                <button type="submit" class="btn-primary" id="btn-salvar-midia">Adicionar ao Catálogo</button>
             </div>
         </form>
     </div>
 
-    <!-- Tabela de filmes -->
+    <div class="form-card hidden" id="form-editar-container">
+        <h2>Editar Dados do Filme</h2>
+        <form id="formEditarMidia" onsubmit="salvarEdicao(event)">
+            <input type="hidden" id="editIdMidia">
+            <input type="hidden" id="editDuracao">
+            <input type="hidden" id="editBilheteria">
+
+            <div class="input-group">
+                <label>Título do Filme</label>
+                <input type="text" id="editTitulo" required>
+            </div>
+            <div class="input-group">
+                <label>Descrição / Sinopse</label>
+                <textarea id="editDescricao" class="custom-textarea" rows="5" required></textarea>
+            </div>
+            <div class="input-group">
+                <label>URL do Pôster</label>
+                <input type="text" id="editPoster" required>
+            </div>
+            <div class="action-buttons">
+                <button type="submit" class="btn-primary">Salvar Alterações</button>
+                <button type="button" class="btn-secondary" onclick="cancelarEdicao()">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
     <div class="form-card">
         <h2>Filmes Cadastrados</h2>
         <table>
@@ -64,7 +80,6 @@
         </table>
     </div>
 
-    <!-- Novo admin -->
     <div class="form-card form-section">
         <h2>Adicionar Novo Administrador</h2>
         <form onsubmit="criarNovoAdmin(event)">
@@ -76,11 +91,10 @@
         </form>
     </div>
 
-    <!-- Excluir usuário -->
     <div class="form-card">
         <h2>Remover Conta do Sistema</h2>
         <p style="color: #888; font-size: 14px; margin-bottom: 15px;">
-            Remova administradores ou usuários comuns permanentemente através do ID.
+            Remova administradores ou utilizadores comuns permanentemente através do ID.
         </p>
         <div style="display: flex; gap: 10px;">
             <input type="number" id="idUsuarioExcluir" placeholder="Digite o ID (Ex: 4)"
@@ -94,96 +108,118 @@
 
 <script src="js/api.js"></script>
 <script>
+    let filmesCatalogo = []; // Guarda os filmes na memória para a edição
+
     document.addEventListener("DOMContentLoaded", () => {
         const u = API.getSessao();
         if (!u || !u.admin) { window.location.href = 'home.html'; return; }
         carregarCatalogo();
     });
 
-    // ── Catálogo ─────────────────────────────────────────────
     async function carregarCatalogo() {
         const res = await API.listarFilmes();
         if (!res.ok) return;
 
-        const filmes = await res.json();
+        filmesCatalogo = await res.json();
         const tbody  = document.getElementById('listaFilmesTbody');
         tbody.innerHTML = '';
 
-        filmes.forEach(f => {
+        filmesCatalogo.forEach(f => {
             const tr = document.createElement('tr');
-            /*
-             * FIX: usa data-* para passar os valores para prepararEdicao em vez
-             * de interpolar direto no onclick (evita quebrar com títulos que
-             * contêm aspas ou apóstrofes).
-             */
             tr.innerHTML = `
                 <td>${f.idMidia}</td>
                 <td>${f.titulo}</td>
                 <td class="action-buttons">
-                    <button class="btn-small btn-edit"
-                            data-id="${f.idMidia}"
-                            data-imdb="${f.idImdb}"
-                            data-titulo="${f.titulo}"
-                            data-poster="${f.posterUrl}"
-                            onclick="prepararEdicao(this)">Editar</button>
-                    <button class="btn-small btn-danger"
-                            onclick="deletarMidia('${f.idMidia}')">Excluir</button>
+                    <button class="btn-small btn-edit" onclick="prepararEdicao(${f.idMidia})">Editar</button>
+                    <button class="btn-small btn-danger" onclick="deletarMidia(${f.idMidia})">Excluir</button>
                 </td>`;
             tbody.appendChild(tr);
         });
     }
 
-    function prepararEdicao(btn) {
-        const { id, imdb, titulo, poster } = btn.dataset;
-
-        document.getElementById('idMidia').value      = id;
-        document.getElementById('tituloMedia').value  = titulo;
-        document.getElementById('imdbIdMedia').value  = imdb;
-        document.getElementById('posterMedia').value  = poster;
-
-        const container = document.getElementById('form-midia-container');
-        document.getElementById('titulo-form-midia').innerText = "Editando Filme: " + titulo;
-        document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
-
-        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        container.classList.add('editing-mode');
-        setTimeout(() => container.classList.remove('editing-mode'), 2000);
-    }
-
-    async function salvarMidia(event) {
+    // ── Lógica de Adicionar (Apenas Título) ──────────────────
+    async function adicionarMidia(event) {
         event.preventDefault();
-        const id = document.getElementById('idMidia').value;
+        const tituloMedia = document.getElementById('tituloMedia').value;
+        const payload = { titulo: tituloMedia };
 
-        const payload = {
-            titulo:    document.getElementById('tituloMedia').value,
-            idImdb:    document.getElementById('imdbIdMedia').value,
-            posterUrl: document.getElementById('posterMedia').value
-        };
+        document.getElementById('btn-salvar-midia').innerText = "Buscando na OMDb...";
 
-        /*
-         * FIX: separação clara entre criar (POST) e editar (PUT) usando
-         * as funções centralizadas do api.js.
-         */
-        const res = id
-            ? await API.atualizarFilme(id, payload)
-            : await API.criarFilme(payload);
-
-        if (res.ok) {
-            cancelarEdicaoMidia();
-            carregarCatalogo();
-        } else {
-            alert("Erro ao salvar filme. Verifique os dados e tente novamente.");
+        try {
+            const res = await API.criarFilme(payload);
+            if (res.ok) {
+                alert(await res.text());
+                document.getElementById('formMidia').reset();
+                carregarCatalogo();
+            } else {
+                alert(await res.text() || "Erro ao adicionar filme.");
+            }
+        } catch (error) {
+            console.error("Erro:", error);
+            alert("Erro de comunicação com o servidor.");
+        } finally {
+            document.getElementById('btn-salvar-midia').innerText = "Adicionar ao Catálogo";
         }
     }
 
-    function cancelarEdicaoMidia() {
-        document.getElementById('formMidia').reset();
-        document.getElementById('idMidia').value = "";
-        document.getElementById('titulo-form-midia').innerText = "Gerenciar Catálogo de Filmes";
-        document.getElementById('btn-cancelar-edicao').classList.add('hidden');
+    // ── Lógica de Editar (Preencher Formulário) ──────────────
+    function prepararEdicao(id) {
+        const filme = filmesCatalogo.find(f => f.idMidia === id);
+        if (!filme) return;
+
+        // Preenche os campos de edição
+        document.getElementById('editIdMidia').value = filme.idMidia;
+        document.getElementById('editTitulo').value = filme.titulo;
+        document.getElementById('editDescricao').value = filme.descricao || '';
+        document.getElementById('editPoster').value = filme.posterUrl || '';
+        document.getElementById('editDuracao').value = filme.duracao || 0;
+        document.getElementById('editBilheteria').value = filme.bilheteria || 0;
+
+        // Alterna a visibilidade dos cards
+        document.getElementById('form-midia-container').classList.add('hidden');
+        const editContainer = document.getElementById('form-editar-container');
+        editContainer.classList.remove('hidden');
+        editContainer.classList.add('editing-mode');
+
+        editContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => editContainer.classList.remove('editing-mode'), 2000);
     }
 
-    // ── Admin ────────────────────────────────────────────────
+    async function salvarEdicao(event) {
+        event.preventDefault();
+        const id = document.getElementById('editIdMidia').value;
+
+        // Mantemos a duração e bilheteria originais ocultas para não perdê-las na atualização
+        const payload = {
+            titulo: document.getElementById('editTitulo').value,
+            descricao: document.getElementById('editDescricao').value,
+            posterUrl: document.getElementById('editPoster').value,
+            duracao: document.getElementById('editDuracao').value,
+            bilheteria: document.getElementById('editBilheteria').value
+        };
+
+        try {
+            const res = await API.atualizarFilme(id, payload);
+            if (res.ok) {
+                alert("Filme atualizado com sucesso!");
+                cancelarEdicao();
+                carregarCatalogo();
+            } else {
+                alert("Erro ao atualizar o filme.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Erro de comunicação com o servidor.");
+        }
+    }
+
+    function cancelarEdicao() {
+        document.getElementById('formEditarMidia').reset();
+        document.getElementById('form-editar-container').classList.add('hidden');
+        document.getElementById('form-midia-container').classList.remove('hidden');
+    }
+
+    // ── Outras Funções Admin ─────────────────────────────────
     async function criarNovoAdmin(event) {
         event.preventDefault();
         const payload = {
@@ -201,7 +237,6 @@
         }
     }
 
-    // ── Usuários ─────────────────────────────────────────────
     async function excluirUsuario() {
         const id = document.getElementById('idUsuarioExcluir').value;
         if (!id) { alert("Por favor, insira um ID válido."); return; }

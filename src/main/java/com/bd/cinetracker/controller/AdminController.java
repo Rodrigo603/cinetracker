@@ -1,10 +1,12 @@
 package com.bd.cinetracker.controller;
 
+import com.bd.cinetracker.DTOs.FilmeDTO;
 import com.bd.cinetracker.model.Admin;
 import com.bd.cinetracker.model.Filme;
 import com.bd.cinetracker.repository.AdminRepository;
 import com.bd.cinetracker.repository.FilmeRepository;
 import com.bd.cinetracker.repository.UsuarioRepository;
+import com.bd.cinetracker.service.OmdbService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +28,14 @@ public class AdminController {
     @Autowired
     private FilmeRepository filmeRepository;
 
-    public record AdminRequest(String nome, String email, String senha, String telefone) {}
+    @Autowired
+    private OmdbService omdbService;
 
+    public record AdminRequest(String nome, String email, String senha, String telefone) {}
     public record AdminLoginResponse(Integer id, String nome, String email, boolean admin) {}
+
+    // Novo Record para receber apenas o título do front-end
+    public record NovoFilmeRequest(String titulo) {}
 
     @PostMapping("/novo-admin")
     public ResponseEntity<String> criarAdmin(@RequestBody AdminRequest request) {
@@ -52,9 +59,44 @@ public class AdminController {
     }
 
     @PostMapping("/filmes")
-    public ResponseEntity<String> adicionarFilme(@RequestBody Filme filme) {
-        filmeRepository.salvar(filme);
-        return ResponseEntity.ok("Filme adicionado ao catálogo!");
+    public ResponseEntity<String> adicionarFilme(@RequestBody NovoFilmeRequest request) {
+        Object resultado = omdbService.buscarMídia(request.titulo());
+
+        if (resultado == null) {
+            return ResponseEntity.status(404).body("Filme não encontrado na API do OMDb.");
+        }
+
+        if (resultado instanceof FilmeDTO dto) {
+            Filme filme = new Filme();
+            filme.setTitulo(dto.titulo());
+            filme.setDescricao(dto.descricao());
+            filme.setPosterUrl(dto.posterUrl());
+            filme.setIdImdb(dto.imdbId());
+            filme.setPaisOrigem(dto.pais());
+
+            try {
+                if (dto.ano() != null && !dto.ano().equals("N/A")) {
+                    filme.setAnoLancamento(Integer.parseInt(dto.ano().substring(0, 4)));
+                }
+                if (dto.duracao() != null && !dto.duracao().equals("N/A")) {
+                    filme.setDuracao(Integer.parseInt(dto.duracao().replace(" min", "")));
+                }
+                if (dto.notaImdb() != null && !dto.notaImdb().equals("N/A")) {
+                    filme.setNotaImdb(Double.parseDouble(dto.notaImdb()));
+                }
+                if (dto.bilheteria() != null && !dto.bilheteria().equals("N/A")) {
+                    String limpaBilheteria = dto.bilheteria().replaceAll("[$,]", "");
+                    filme.setBilheteria(Double.parseDouble(limpaBilheteria));
+                }
+            } catch (Exception e) {
+                System.out.println("Erro ao converter números do OMDb: " + e.getMessage());
+            }
+
+            filmeRepository.salvar(filme);
+            return ResponseEntity.ok("Filme '" + filme.getTitulo() + "' adicionado ao catálogo com sucesso!");
+        }
+
+        return ResponseEntity.badRequest().body("O título buscado não é um filme (poderá ser uma série).");
     }
 
     @PutMapping("/filmes/{id}")
@@ -91,5 +133,4 @@ public class AdminController {
     public ResponseEntity<List<Usuario>> listarUsuarios() {
         return ResponseEntity.ok(usuarioRepository.listarTodos());
     }
-
 }
