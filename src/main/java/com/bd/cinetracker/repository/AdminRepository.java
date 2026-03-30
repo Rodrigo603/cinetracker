@@ -53,4 +53,16 @@ public class AdminRepository {
                 rs.getInt("FK_TELEFONE_TELEFONE_PK")
         ), email);
     }
+
+    public Admin buscarPorId(Integer id) {
+        String sql = "SELECT * FROM ADMIN WHERE ID_ADMIN = ?";
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new Admin(
+                rs.getInt("ID_ADMIN"),
+                rs.getString("NOME"),
+                rs.getString("EMAIL"),
+                rs.getString("SENHA"),
+                rs.getDate("DT_CADASTRO").toLocalDate(),
+                rs.getInt("FK_TELEFONE_TELEFONE_PK")
+        ), id);
+    }
 }

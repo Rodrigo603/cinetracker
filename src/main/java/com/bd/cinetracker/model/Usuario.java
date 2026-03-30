@@ -11,6 +11,7 @@ public class Usuario {
     private String senha;
     private LocalDate dataCadastro;
     private Integer fkTelefone;
+    private String telefone;
 
     public Usuario() {}
 
@@ -71,6 +72,10 @@ public class Usuario {
     public void setFkTelefone(Integer fkTelefone) {
         this.fkTelefone = fkTelefone;
     }
+
+    public String getTelefone() { return telefone; }
+
+    public void setTelefone(String telefone) { this.telefone = telefone; }
 
     @Override
     public boolean equals(Object o) {

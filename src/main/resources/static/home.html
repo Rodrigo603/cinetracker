@@ -12,20 +12,21 @@
         <a href="home.html">Início</a>
         <a href="admin.html" id="linkAdmin" style="display: none;">Painel Admin</a>
         <a href="perfil.html">Perfil</a>
-        <a href="#" onclick="sair()">Sair</a>
+        <a href="#" onclick="API.encerrarSessao()">Sair</a>
     </div>
 </nav>
+
 <div class="row" style="margin-top: 40px;">
     <h2 class="row-title">Filmes no Catálogo</h2>
     <div class="posters" id="listaFilmes"></div>
 </div>
+
+<script src="js/api.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
-        if (!usuario) {
-            window.location.href = 'index.html';
-            return;
-        }
+        const usuario = API.getSessao();
+        if (!usuario) { window.location.href = 'index.html'; return; }
+
         if (usuario.admin) {
             document.getElementById('linkAdmin').style.display = 'block';
         }
@@ -34,31 +35,26 @@
 
     async function carregarFilmes() {
         try {
-            const response = await fetch('/filmes');
+            const response = await API.listarFilmes();
             if (response.ok) {
-                const filmes = await response.json();
+                const filmes    = await response.json();
                 const container = document.getElementById('listaFilmes');
                 container.innerHTML = '';
+
                 filmes.forEach(f => {
-                    const div = document.createElement('div');
+                    const div   = document.createElement('div');
                     div.className = 'poster-card';
-                    const titulo = f.titulo || 'Filme';
+                    const titulo = f.titulo   || 'Filme';
                     const poster = f.posterUrl || '';
 
-                    // CORREÇÃO: onerror substitui imagens com link quebrado por uma capa genérica cinza
                     div.innerHTML = `<img src="${poster}" alt="${titulo}" title="${titulo}"
-                                     onerror="this.onerror=null; this.src='https://via.placeholder.com/200x300/2b2b2b/FFFFFF?text=Sem+Capa';">`;
+                                     onerror="this.onerror=null;this.src='https://via.placeholder.com/200x300/2b2b2b/FFFFFF?text=Sem+Capa';">`;
                     container.appendChild(div);
                 });
             }
         } catch (e) {
             console.error("Erro ao buscar filmes", e);
         }
-    }
-
-    function sair() {
-        localStorage.removeItem('usuarioLogado');
-        window.location.href = 'index.html';
     }
 </script>
 </body>

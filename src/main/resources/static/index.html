@@ -15,26 +15,61 @@
         <div class="input-group">
             <input type="password" id="senha" placeholder="Senha" required>
         </div>
+        <p id="erroLogin" style="color: #e50914; display: none; text-align: center;">
+            Email ou senha inválidos.
+        </p>
         <button type="submit" class="btn-primary">Entrar</button>
     </form>
     <div class="auth-switch">
         Novo por aqui? <a href="cadastro.html">Cadastre-se agora.</a>
     </div>
 </div>
+
+<script src="js/api.js"></script>
 <script>
-    function fazerLogin(event) {
+    async function fazerLogin(event) {
         event.preventDefault();
+
         const email = document.getElementById('email').value;
-        const isAdmin = email.toLowerCase().includes('admin');
+        const senha = document.getElementById('senha').value;
+        const erro  = document.getElementById('erroLogin');
+        erro.style.display = 'none';
 
+        try {
+            const resAdmin = await API.loginAdmin(email, senha);
+            if (resAdmin.ok) {
+                const admin = await resAdmin.json();
+                API.setSessao({
+                    id:    admin.id,
+                    nome:  admin.nome,
+                    email: admin.email,
+                    admin: true
+                });
+                window.location.href = 'home.html';
+                return;
+            }
+        } catch (e) {
+            console.error("Erro ao tentar login admin", e);
+        }
 
-        const sessao = {
-            email: email,
-            admin: isAdmin
-        };
+        try {
+            const resUser = await API.loginUsuario(email, senha);
+            if (resUser.ok) {
+                const usuario = await resUser.json();
+                API.setSessao({
+                    id:    usuario.id,
+                    nome:  usuario.nome,
+                    email: usuario.email,
+                    admin: false
+                });
+                window.location.href = 'home.html';
+                return;
+            }
+        } catch (e) {
+            console.error("Erro ao tentar login usuário", e);
+        }
 
-        localStorage.setItem('usuarioLogado', JSON.stringify(sessao));
-        window.location.href = 'home.html';
+        erro.style.display = 'block';
     }
 </script>
 </body>

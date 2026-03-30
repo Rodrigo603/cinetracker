@@ -9,40 +9,80 @@
 <div class="auth-box">
     <h1>Cadastrar</h1>
     <form onsubmit="fazerCadastro(event)">
-        <div class="input-group"><input type="text" id="nome" placeholder="Nome completo" required></div>
-        <div class="input-group"><input type="email" id="email" placeholder="Email" required></div>
-        <div class="input-group"><input type="tel" id="telefone" placeholder="Telefone" required></div>
-        <div class="input-group"><input type="password" id="senha" placeholder="Senha" required></div>
+        <div class="input-group"><input type="text"     id="nome"      placeholder="Nome completo" required></div>
+        <div class="input-group"><input type="email"    id="email"     placeholder="Email"         required></div>
+        <div class="input-group"><input type="tel"      id="telefone"  placeholder="Telefone"      required></div>
+        <div class="input-group"><input type="password" id="senha"     placeholder="Senha"         required></div>
+        <p id="erroCadastro" style="color: #e50914; display: none; text-align: center;">
+            Erro ao cadastrar. Tente novamente.
+        </p>
         <button type="submit" class="btn-primary">Finalizar Cadastro</button>
     </form>
     <div class="auth-switch">
         Já tem uma conta? <a href="index.html">Faça login.</a>
     </div>
 </div>
+
+<script src="js/api.js"></script>
 <script>
     async function fazerCadastro(event) {
         event.preventDefault();
-        const email = document.getElementById('email').value;
-        const isAdmin = email.toLowerCase().includes('admin');
-        const endpoint = isAdmin ? '/admin/novo-admin' : '/usuarios/cadastrar';
+        const erro = document.getElementById('erroCadastro');
+        erro.style.display = 'none';
+
         const payload = {
-            nome: document.getElementById('nome').value,
-            email: email,
-            telefone: document.getElementById('telefone').value,
-            senha: document.getElementById('senha').value
+            nome:      document.getElementById('nome').value,
+            email:     document.getElementById('email').value,
+            telefone:  document.getElementById('telefone').value,
+            senha:     document.getElementById('senha').value
         };
+
         try {
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if(response.ok) {
-                alert(isAdmin ? "Administrador cadastrado!" : "Usuário cadastrado!");
-                window.location.href = 'index.html';
+            const response = await API.cadastrarUsuario(payload);
+
+            if (response.ok) {
+                /*
+                 * O backend pode retornar:
+                 *   a) JSON com os dados do usuário criado  → salva sessão completa
+                 *   b) body vazio / 204                     → salva sessão com dados do form
+                 * Em ambos os casos redireciona para home.
+                 */
+                let sessao = { nome: payload.nome, email: payload.email, admin: false };
+
+                const contentType = response.headers.get('Content-Type') || '';
+                if (contentType.includes('application/json')) {
+                    try {
+                        const novoUsuario = await response.json();
+                        if (novoUsuario && novoUsuario.id) {
+                            sessao = {
+                                id:    novoUsuario.id,
+                                nome:  novoUsuario.nome  || payload.nome,
+                                email: novoUsuario.email || payload.email,
+                                admin: false
+                            };
+                        }
+                    } catch (_) { /* body vazio mesmo com header JSON — ignora */ }
+                }
+
+                API.setSessao(sessao);
+                alert("Usuário cadastrado com sucesso!");
+                window.location.href = 'index.html'; // vai para login para pegar o id correto do banco
+            } else {
+                const contentType = response.headers.get('Content-Type') || '';
+                let msg = 'Erro ao cadastrar. Tente novamente.';
+                if (contentType.includes('application/json')) {
+                    try {
+                        const body = await response.json();
+                        if (body.message) msg = body.message;
+                    } catch (_) {}
+                }
+                document.getElementById('erroCadastro').innerText = msg;
+                erro.style.display = 'block';
+                console.error("Erro do servidor:", response.status);
             }
         } catch (error) {
-            alert("Erro ao conectar com o servidor.");
+            erro.style.display = 'block';
+            console.error("Erro ao conectar com o servidor.", error);
         }
     }
 </script>

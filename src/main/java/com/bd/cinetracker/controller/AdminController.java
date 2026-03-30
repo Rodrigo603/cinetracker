@@ -8,9 +8,10 @@ import com.bd.cinetracker.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.bd.cinetracker.model.Usuario;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/admin")
@@ -26,6 +27,8 @@ public class AdminController {
     private FilmeRepository filmeRepository;
 
     public record AdminRequest(String nome, String email, String senha, String telefone) {}
+
+    public record AdminLoginResponse(Integer id, String nome, String email, boolean admin) {}
 
     @PostMapping("/novo-admin")
     public ResponseEntity<String> criarAdmin(@RequestBody AdminRequest request) {
@@ -74,4 +77,19 @@ public class AdminController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginAdmin(@RequestBody AdminRequest request) {
+        Admin a = adminRepository.buscarPorEmail(request.email());
+        if (a == null || !a.getSenha().equals(request.senha())) {
+            return ResponseEntity.status(401).body("Credenciais inválidas");
+        }
+        return ResponseEntity.ok(new AdminLoginResponse(a.getIdAdmin(), a.getNome(), a.getEmail(), true));
+    }
+
+    @GetMapping("/usuarios")
+    public ResponseEntity<List<Usuario>> listarUsuarios() {
+        return ResponseEntity.ok(usuarioRepository.listarTodos());
+    }
+
 }

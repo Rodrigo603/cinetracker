@@ -27,7 +27,7 @@
         <a href="home.html">Início</a>
         <a href="admin.html" id="linkAdmin" style="display: none;">Painel Admin</a>
         <a href="perfil.html">Perfil</a>
-        <a href="#" onclick="sair()">Sair</a>
+        <a href="#" onclick="API.encerrarSessao()">Sair</a>
     </div>
 </nav>
 
@@ -42,52 +42,56 @@
         <form id="formPerfil" onsubmit="salvarPerfil(event)">
             <div class="input-group">
                 <label>Nome Completo</label>
-                <input type="text" id="perfilNome" readonly required>
+                <input type="text"  id="perfilNome"     readonly required>
             </div>
             <div class="input-group">
                 <label>E-mail</label>
-                <input type="email" id="perfilEmail" readonly required>
+                <input type="email" id="perfilEmail"    readonly required>
             </div>
             <div class="input-group">
                 <label>Telefone</label>
-                <input type="tel" id="perfilTelefone" readonly required>
+                <input type="tel"   id="perfilTelefone" readonly required>
             </div>
             <div class="input-group" id="divSenha" style="display: none;">
-                <label>Nova Senha</label>
-                <input type="password" id="perfilSenha">
+                <label>Nova Senha (deixe em branco para manter a atual)</label>
+                <input type="password" id="perfilSenha" placeholder="••••••••">
             </div>
 
             <div style="display: flex; gap: 15px; margin-top: 25px;">
-                <button type="button" id="btnEditar" class="btn-secondary" onclick="habilitarEdicao()">Editar Dados</button>
-                <button type="submit" id="btnSalvar" class="btn-primary" style="display: none;">Confirmar Alterações</button>
-                <button type="button" id="btnCancelar" class="btn-secondary" style="display: none;" onclick="location.reload()">Cancelar</button>
+                <button type="button" id="btnEditar"   class="btn-secondary"                    onclick="habilitarEdicao()">Editar Dados</button>
+                <button type="submit" id="btnSalvar"   class="btn-primary"  style="display:none;">Confirmar Alterações</button>
+                <button type="button" id="btnCancelar" class="btn-secondary" style="display:none;" onclick="location.reload()">Cancelar</button>
             </div>
         </form>
     </div>
 </div>
 
+<script src="js/api.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
-        const sessao = JSON.parse(localStorage.getItem('usuarioLogado'));
-        if (!sessao) { window.location.href = 'index.html'; return; }
-
-
-        const idReal = sessao.email.includes('rodri') ? 4 : 3;
+        const sessao = API.getSessao();
+        if (!sessao || !sessao.id) { window.location.href = 'index.html'; return; }
 
         try {
+            /*
+             * FIX: sempre busca os dados frescos do servidor usando o id da
+             * sessão. Antes, o perfil podia exibir dados de outro usuário
+             * porque o localStorage ficava desatualizado após o cadastro.
+             */
+            const response = await API.buscarUsuario(sessao.id);
 
-            const response = await fetch(`/usuarios/atualizar/${idReal}`);
+            if (!response.ok) {
+                console.error("Usuário não encontrado no servidor.");
+                return;
+            }
 
+            const usuario = await response.json();
 
-
-            const nomeNoBanco = sessao.email.includes('rodri') ? "Rodrigo gg dantas" : "Andre Avelino";
-            const foneNoBanco = sessao.email.includes('rodri') ? "11987654321" : "11954321098";
-
-            document.getElementById('userNameLabel').innerText = nomeNoBanco;
-            document.getElementById('userInitial').innerText = nomeNoBanco.charAt(0).toUpperCase();
-            document.getElementById('perfilNome').value = nomeNoBanco;
-            document.getElementById('perfilEmail').value = sessao.email;
-            document.getElementById('perfilTelefone').value = foneNoBanco;
+            document.getElementById('userNameLabel').innerText        = usuario.nome;
+            document.getElementById('userInitial').innerText          = usuario.nome.charAt(0).toUpperCase();
+            document.getElementById('perfilNome').value               = usuario.nome;
+            document.getElementById('perfilEmail').value              = usuario.email;
+            document.getElementById('perfilTelefone').value           = usuario.telefone;
 
             if (sessao.admin) {
                 document.getElementById('linkAdmin').style.display = 'block';
@@ -96,48 +100,58 @@
                 badge.classList.add('admin-badge');
             }
 
+            // Mantém sessão sincronizada com dados reais do banco
+            API.setSessao({ ...sessao, nome: usuario.nome, email: usuario.email });
 
-            sessao.id = idReal;
-            sessao.nome = nomeNoBanco;
-            localStorage.setItem('usuarioLogado', JSON.stringify(sessao));
-
-        } catch (e) { console.error("Erro ao carregar dados", e); }
+        } catch (e) {
+            console.error("Erro ao carregar dados do perfil", e);
+        }
     });
 
     function habilitarEdicao() {
-        document.getElementById('perfilNome').readOnly = false;
+        document.getElementById('perfilNome').readOnly     = false;
         document.getElementById('perfilTelefone').readOnly = false;
-        document.getElementById('divSenha').style.display = 'block';
-        document.getElementById('btnEditar').style.display = 'none';
-        document.getElementById('btnSalvar').style.display = 'block';
+        document.getElementById('divSenha').style.display  = 'block';
+        document.getElementById('btnEditar').style.display  = 'none';
+        document.getElementById('btnSalvar').style.display  = 'block';
         document.getElementById('btnCancelar').style.display = 'block';
     }
 
     async function salvarPerfil(event) {
         event.preventDefault();
-        const u = JSON.parse(localStorage.getItem('usuarioLogado'));
+        const sessao = API.getSessao();
 
+        const novaSenha = document.getElementById('perfilSenha').value;
+
+        /*
+         * FIX: não tenta ler sessao.senha (que nunca existiu no localStorage).
+         * Se o campo senha estiver vazio, envia string vazia — o backend deve
+         * ignorar e manter a senha atual. Se precisar enviar a senha antiga,
+         * adicione um campo "senha atual" no formulário.
+         */
         const payload = {
-            nome: document.getElementById('perfilNome').value,
-            email: document.getElementById('perfilEmail').value,
-            telefone: document.getElementById('perfilTelefone').value,
-            senha: document.getElementById('perfilSenha').value || "12345"
+            nome:      document.getElementById('perfilNome').value,
+            email:     document.getElementById('perfilEmail').value,
+            telefone:  document.getElementById('perfilTelefone').value,
+            ...(novaSenha ? { senha: novaSenha } : {})
         };
 
-        const response = await fetch(`/usuarios/atualizar/${u.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+        try {
+            const response = await API.atualizarUsuario(sessao.id, payload);
 
-        if(response.ok) {
-            localStorage.setItem('usuarioLogado', JSON.stringify({ ...u, ...payload }));
-            alert("Perfil atualizado no Banco de Dados!");
-            location.reload();
+            if (response.ok) {
+                // Atualiza sessão com novo nome/email
+                API.setSessao({ ...sessao, nome: payload.nome, email: payload.email });
+                alert("Perfil atualizado com sucesso!");
+                location.reload();
+            } else {
+                alert("Erro ao atualizar perfil. Tente novamente.");
+            }
+        } catch (e) {
+            console.error("Erro na requisição de atualização", e);
+            alert("Erro de conexão. Tente novamente.");
         }
     }
-
-    function sair() { localStorage.removeItem('usuarioLogado'); window.location.href = 'index.html'; }
 </script>
 </body>
 </html>
