@@ -43,7 +43,10 @@ public class UsuarioController {
 
         usuarioExistente.setNome(request.nome());
         usuarioExistente.setEmail(request.email());
-        usuarioExistente.setSenha(request.senha());
+
+        if (request.senha() != null && !request.senha().trim().isEmpty()) {
+            usuarioExistente.setSenha(request.senha());
+        }
 
         usuarioRepository.atualizarPerfilCompleto(usuarioExistente, request.telefone());
 
