@@ -24,8 +24,10 @@ Para rodar a aplicação é necessário ter instalado na máquina os seguintes a
 ### 2. Configurando as Variáveis de Ambiente:
 Ao abrir o arquivo do projeto você verá as seguintes pastas:
 <img width="437" height="366" alt="image" src="https://github.com/user-attachments/assets/9a731d10-9c3b-4a11-8d1c-6f01fd9244e0" />
+
 Clique na pasta *main*, depois *resources* e depois abra o arquivo *"application.properties.example"*:
 <img width="430" height="406" alt="image" src="https://github.com/user-attachments/assets/00279dd7-d3da-41aa-8c81-e322886ed3c1" />
+
 Ao abrir o arquivo você verá:
 ```application.properties.example
 spring.datasource.url=jdbc:mysql://localhost:3306/cinetracker
