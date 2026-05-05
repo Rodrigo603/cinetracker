@@ -50,7 +50,9 @@ async function carregarSerie(id) {
             document.getElementById('titulo').innerText = serie.titulo;
             document.getElementById('descricao').innerText = serie.descricao || 'Sem sinopse disponível.';
 
+            // O Ano entra aqui, nas tags gerais da Série!
             document.getElementById('tags').innerHTML = `
+                <span class="detalhes-tag-item">Ano: ${serie.anoLancamento}</span>
                 <span class="detalhes-tag-item">Temporadas: ${serie.qtdTemporadas}</span>
                 <span class="detalhes-tag-item" style="background:#e50914;">⭐ IMDb: ${serie.notaImdb}</span>
             `;
@@ -69,17 +71,37 @@ async function carregarEpisodios(idSerie) {
         if (res.ok) {
             const episodios = await res.json();
 
+            if (episodios.length === 0) {
+                area.innerHTML = '<p style="color:#aaa;">Nenhum episódio cadastrado para esta série ainda.</p>';
+                return;
+            }
+
             const temporadasMap = {};
             episodios.forEach(ep => {
                 if(!temporadasMap[ep.numTemporada]) temporadasMap[ep.numTemporada] = [];
                 temporadasMap[ep.numTemporada].push(ep);
             });
 
-            let html = '';
-            for(let temp in temporadasMap) {
-                html += `<div class="temporada-bloco"><h2 style="color:#fff; margin-bottom: 15px;">Temporada ${temp}</h2>`;
-                temporadasMap[temp].forEach(ep => {
-                    html += `
+            const temporadasDisponiveis = Object.keys(temporadasMap).sort((a, b) => a - b);
+
+            let seletorHtml = `<select id="seletorTemporada" class="season-selector">`;
+            temporadasDisponiveis.forEach(temp => {
+                seletorHtml += `<option value="${temp}">Temporada ${temp}</option>`;
+            });
+            seletorHtml += `</select>`;
+
+            let listaHtml = `<div id="listaEpisodiosRender" class="temporada-bloco" style="margin-top: 0;"></div>`;
+
+            area.innerHTML = seletorHtml + listaHtml;
+
+            const seletor = document.getElementById('seletorTemporada');
+            const listaContainer = document.getElementById('listaEpisodiosRender');
+
+            const renderizarTemporada = (numTemporada) => {
+                const eps = temporadasMap[numTemporada] || [];
+                let htmlEps = '';
+                eps.forEach(ep => {
+                    htmlEps += `
                         <div class="ep-item">
                             <h3 style="color:#fff; font-size:18px;">
                                 <span style="color:#e50914;">${ep.numEpisodio}.</span> ${ep.titulo}
@@ -88,9 +110,14 @@ async function carregarEpisodios(idSerie) {
                             <p style="font-size:15px; color:#aaa; margin-top:8px;">${ep.descricao || 'Sem sinopse.'}</p>
                         </div>`;
                 });
-                html += `</div>`;
-            }
-            area.innerHTML = html;
+                listaContainer.innerHTML = htmlEps;
+            };
+
+            seletor.addEventListener('change', (event) => {
+                renderizarTemporada(event.target.value);
+            });
+
+            renderizarTemporada(temporadasDisponiveis[0]);
         }
     } catch (e) {
         area.innerHTML = '<p style="color:#e50914;">Erro ao buscar episódios.</p>';

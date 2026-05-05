@@ -54,6 +54,7 @@ public class SerieRepository {
             s.setPosterUrl(rs.getString("POSTER_URL"));
             s.setNotaImdb(rs.getDouble("NOTA_IMDB"));
             s.setQtdTemporadas(rs.getInt("QTD_TEMPORADAS"));
+            s.setAnoLancamento(rs.getInt("ANO_LANCAMENTO"));
             return s;
         }, id);
     }
