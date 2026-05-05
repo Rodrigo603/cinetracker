@@ -29,4 +29,13 @@ public class FilmeController {
         }
         return ResponseEntity.ok(filmes);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Filme> buscarPorId(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(filmeRepository.buscarPorId(id));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

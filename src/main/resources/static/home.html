@@ -12,13 +12,18 @@
         <a href="home.html">Início</a>
         <a href="admin.html" id="linkAdmin" style="display: none;">Painel Admin</a>
         <a href="perfil.html">Perfil</a>
-        <a href="#" onclick="API.encerrarSessao()">Sair</a>
+        <a href="#" id="btnSair">Sair</a>
     </div>
 </nav>
 
 <div class="row" style="margin-top: 40px;">
     <h2 class="row-title">Filmes no Catálogo</h2>
     <div class="posters" id="listaFilmes"></div>
+</div>
+
+<div class="row">
+    <h2 class="row-title">Séries no Catálogo</h2>
+    <div class="posters" id="listaSeries"></div>
 </div>
 
 <script src="js/api.js"></script>

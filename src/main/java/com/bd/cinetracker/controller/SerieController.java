@@ -1,6 +1,7 @@
 package com.bd.cinetracker.controller;
 
 import com.bd.cinetracker.DTOs.EpisodioSerieDTO;
+import com.bd.cinetracker.model.Filme;
 import com.bd.cinetracker.model.Serie;
 import com.bd.cinetracker.repository.SerieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,5 +25,14 @@ public class SerieController {
     public ResponseEntity<List<EpisodioSerieDTO>> listarEpisodios(@PathVariable Integer id) {
         List<EpisodioSerieDTO> episodios = serieRepository.buscarEpisodiosPorSerie(id);
         return ResponseEntity.ok(episodios);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Serie> buscarPorId(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(serieRepository.buscarPorId(id));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

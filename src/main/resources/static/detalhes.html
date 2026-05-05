@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes - CineTracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .detalhes-container { display: flex; gap: 40px; padding: 40px 5%; margin-top: 40px; }
+        .detalhes-poster { width: 300px; height: 450px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); object-fit: cover; }
+        .detalhes-info { flex: 1; color: #fff; }
+        .detalhes-titulo { font-size: 42px; font-weight: 700; margin-bottom: 10px; }
+        .detalhes-tags { color: #888; font-size: 16px; margin-bottom: 25px; display: flex; gap: 15px; }
+        .detalhes-tag-item { background: #333; padding: 5px 12px; border-radius: 4px; color: #fff; font-weight: 600; }
+        .detalhes-sinopse { font-size: 18px; line-height: 1.6; color: #ccc; margin-bottom: 30px; }
+
+        .temporada-bloco { margin-top: 30px; background: #181818; padding: 20px; border-radius: 12px; border-left: 5px solid #e50914; }
+        .ep-item { border-bottom: 1px solid #333; padding: 15px 0; }
+        .ep-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="home.html" class="logo">CineTracker</a>
+    <div class="nav-links">
+        <a href="home.html">Início</a>
+        <a href="admin.html" id="linkAdmin" style="display: none;">Painel Admin</a>
+        <a href="perfil.html">Perfil</a>
+        <a href="#" onclick="API.encerrarSessao()">Sair</a>
+    </div>
+</nav>
+
+<div class="detalhes-container">
+    <img id="poster" class="detalhes-poster" src="" alt="Poster">
+    <div class="detalhes-info">
+        <h1 id="titulo" class="detalhes-titulo">Carregando...</h1>
+        <div id="tags" class="detalhes-tags"></div>
+        <p id="descricao" class="detalhes-sinopse"></p>
+
+        <div id="areaEpisodios"></div>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/detalhes.js"></script>
+</body>
+</html>

@@ -24,57 +24,26 @@ const API = (() => {
         window.location.href = 'index.html';
     }
 
-    async function loginAdmin(email, senha) {
-        return _request('POST', '/admin/login', { email, senha });
-    }
+    async function loginAdmin(email, senha) { return _request('POST', '/admin/login', { email, senha }); }
+    async function loginUsuario(email, senha) { return _request('POST', '/usuarios/login', { email, senha }); }
+    async function cadastrarUsuario(payload) { return _request('POST', '/usuarios/cadastrar', payload); }
+    async function buscarUsuario(id) { return _request('GET', `/usuarios/${id}`); }
+    async function atualizarUsuario(id, payload) { return _request('PUT', `/usuarios/atualizar/${id}`, payload); }
+    async function excluirUsuario(id) { return _request('DELETE', `/admin/usuarios/${id}`); }
 
-    async function loginUsuario(email, senha) {
-        return _request('POST', '/usuarios/login', { email, senha });
-    }
+    async function criarAdmin(payload) { return _request('POST', '/admin/novo-admin', payload); }
+    async function buscarAdmin(id) { return _request('GET', `/admin/${id}`); }
+    async function atualizarAdmin(id, payload) { return _request('PUT', `/admin/atualizar/${id}`, payload); }
 
-    async function cadastrarUsuario(payload) {
-        return _request('POST', '/usuarios/cadastrar', payload);
-    }
+    async function listarFilmes() { return _request('GET', '/filmes'); }
+    async function criarFilme(payload) { return _request('POST', '/admin/filmes', payload); }
+    async function atualizarFilme(id, payload) { return _request('PUT', `/admin/filmes/${id}`, payload); }
+    async function deletarFilme(id) { return _request('DELETE', `/admin/filmes/${id}`); }
+    async function buscarFilmePorId(id) { return _request('GET', `/filmes/${id}`); }
 
-    async function buscarUsuario(id) {
-        return _request('GET', `/usuarios/${id}`);
-    }
-
-    async function atualizarUsuario(id, payload) {
-        return _request('PUT', `/usuarios/atualizar/${id}`, payload);
-    }
-
-    async function excluirUsuario(id) {
-        return _request('DELETE', `/admin/usuarios/${id}`);
-    }
-
-    async function listarFilmes() {
-        return _request('GET', '/filmes');
-    }
-
-    async function criarFilme(payload) {
-        return _request('POST', '/admin/filmes', payload);
-    }
-
-    async function atualizarFilme(id, payload) {
-        return _request('PUT', `/admin/filmes/${id}`, payload);
-    }
-
-    async function deletarFilme(id) {
-        return _request('DELETE', `/admin/filmes/${id}`);
-    }
-
-    async function criarAdmin(payload) {
-        return _request('POST', '/admin/novo-admin', payload);
-    }
-
-    async function buscarAdmin(id) {
-        return _request('GET', `/admin/${id}`);
-    }
-
-    async function atualizarAdmin(id, payload) {
-        return _request('PUT', `/admin/atualizar/${id}`, payload);
-    }
+    async function listarSeries() { return _request('GET', '/series'); }
+    async function buscarSeriePorId(id) { return _request('GET', `/series/${id}`); }
+    async function listarEpisodiosDaSerie(idSerie) { return _request('GET', `/series/${idSerie}/episodios`); }
 
     return {
         getSessao,
@@ -92,6 +61,10 @@ const API = (() => {
         deletarFilme,
         criarAdmin,
         buscarAdmin,
-        atualizarAdmin
+        atualizarAdmin,
+        buscarFilmePorId,
+        buscarSeriePorId,
+        listarSeries,
+        listarEpisodiosDaSerie
     };
 })();

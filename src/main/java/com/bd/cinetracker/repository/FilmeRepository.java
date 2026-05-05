@@ -90,4 +90,22 @@ public class FilmeRepository {
         String sql = "DELETE FROM FILME WHERE ID_MIDIA = ?";
         return jdbcTemplate.update(sql, id);
     }
+
+    public Filme buscarPorId(Integer id) {
+        String sql = "SELECT * FROM FILME WHERE ID_MIDIA = ?";
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+            Filme f = new Filme();
+            f.setIdMidia(rs.getInt("ID_MIDIA"));
+            f.setIdImdb(rs.getString("ID_IMDB"));
+            f.setTitulo(rs.getString("TITULO"));
+            f.setDescricao(rs.getString("DESCRICAO"));
+            f.setPosterUrl(rs.getString("POSTER_URL"));
+            f.setNotaImdb(rs.getDouble("NOTA_IMDB"));
+            f.setBilheteria(rs.getDouble("BILHETERIA"));
+            f.setAnoLancamento(rs.getInt("ANO_LANCAMENTO"));
+            f.setDuracao(rs.getInt("DURACAO"));
+            return f;
+        }, id);
+    }
+
 }

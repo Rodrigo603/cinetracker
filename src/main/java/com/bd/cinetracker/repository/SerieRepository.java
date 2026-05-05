@@ -43,4 +43,18 @@ public class SerieRepository {
                 rs.getString("DESCRICAO")
         ), idSerie);
     }
+
+    public Serie buscarPorId(Integer id) {
+        String sql = "SELECT * FROM SERIE WHERE ID_MIDIA = ?";
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+            Serie s = new Serie();
+            s.setIdMidia(rs.getInt("ID_MIDIA"));
+            s.setTitulo(rs.getString("TITULO"));
+            s.setDescricao(rs.getString("DESCRICAO"));
+            s.setPosterUrl(rs.getString("POSTER_URL"));
+            s.setNotaImdb(rs.getDouble("NOTA_IMDB"));
+            s.setQtdTemporadas(rs.getInt("QTD_TEMPORADAS"));
+            return s;
+        }, id);
+    }
 }
