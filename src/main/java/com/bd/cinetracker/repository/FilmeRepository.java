@@ -53,7 +53,7 @@ public class FilmeRepository {
     }
 
     public List<Filme> listarTodos() {
-        String sql = "SELECT * FROM FILME ORDER BY ANO_LANCAMENTO DESC";
+        String sql = "SELECT * FROM FILME ORDER BY RAND()";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Filme f = new Filme();
