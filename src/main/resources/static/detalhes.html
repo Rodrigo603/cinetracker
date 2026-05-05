@@ -36,7 +36,33 @@
         <div id="tags" class="detalhes-tags"></div>
         <p id="descricao" class="detalhes-sinopse"></p>
 
+        <!-- Área onde o select e os episódios aparecerão (se for série) -->
         <div id="areaEpisodios"></div>
+
+        <!-- ÁREA DE AVALIAÇÕES -->
+        <div id="areaAvaliacoes" style="margin-top: 50px; border-top: 1px solid #333; padding-top: 30px;">
+            <h2 style="color: #fff; margin-bottom: 20px;">Avaliações da Comunidade</h2>
+
+            <form id="formAvaliacao" style="background: #181818; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                <h3 id="tituloFormAvaliacao" style="color: #fff; margin-bottom: 15px; font-size: 18px;">Deixe sua avaliação</h3>
+                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                    <select id="notaAvaliacao" style="padding: 10px; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 4px; outline: none;">
+                        <option value="5">5 ⭐ Excelente</option>
+                        <option value="4">4 ⭐ Muito Bom</option>
+                        <option value="3">3 ⭐ Bom</option>
+                        <option value="2">2 ⭐ Regular</option>
+                        <option value="1">1 ⭐ Ruim</option>
+                    </select>
+                    <input type="text" id="comentarioAvaliacao" placeholder="Escreva o que achou..." style="flex: 1; padding: 10px; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 4px; outline: none;" required>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" id="btnSubmitAvaliacao" class="btn-primary" style="width: auto; padding: 10px 25px;">Publicar Avaliação</button>
+                    <button type="button" id="btnCancelarEdicao" class="btn-secondary" style="display: none; width: auto; padding: 10px 25px;" onclick="cancelarEdicaoAvaliacao()">Cancelar Edição</button>
+                </div>
+            </form>
+
+            <div id="listaAvaliacoesRender" style="display: flex; flex-direction: column; gap: 15px;"></div>
+        </div>
     </div>
 </div>
 

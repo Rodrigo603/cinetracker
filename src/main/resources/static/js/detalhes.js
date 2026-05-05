@@ -1,3 +1,5 @@
+let idAvaliacaoEditando = null;
+
 document.addEventListener("DOMContentLoaded", async () => {
     const usuario = API.getSessao();
     if (!usuario) { window.location.href = 'index.html'; return; }
@@ -17,6 +19,45 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else if (tipo === 'serie') {
         carregarSerie(id);
     }
+
+    carregarAvaliacoesDaComunidade(id, tipo);
+
+    document.getElementById('formAvaliacao').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const notaValor = parseFloat(document.getElementById('notaAvaliacao').value);
+        const comentarioValor = document.getElementById('comentarioAvaliacao').value;
+
+        try {
+            if (idAvaliacaoEditando) {
+                const payloadUpdate = { idUsuario: usuario.id, nota: notaValor, comentario: comentarioValor };
+                const res = await API.atualizarAvaliacao(idAvaliacaoEditando, payloadUpdate);
+                if(res.ok) {
+                    cancelarEdicaoAvaliacao();
+                    carregarAvaliacoesDaComunidade(id, tipo);
+                } else {
+                    alert("Erro ao editar avaliação.");
+                }
+            } else {
+                const payloadNew = {
+                    idUsuario: usuario.id,
+                    idMidia: parseInt(id),
+                    tipo: tipo,
+                    nota: notaValor,
+                    comentario: comentarioValor
+                };
+                const res = await API.criarAvaliacao(payloadNew);
+                if(res.ok) {
+                    document.getElementById('comentarioAvaliacao').value = '';
+                    carregarAvaliacoesDaComunidade(id, tipo);
+                } else {
+                    alert("Erro ao publicar avaliação.");
+                }
+            }
+        } catch (err) {
+            alert("Erro de conexão ao salvar avaliação.");
+        }
+    });
 });
 
 async function carregarFilme(id) {
@@ -50,7 +91,6 @@ async function carregarSerie(id) {
             document.getElementById('titulo').innerText = serie.titulo;
             document.getElementById('descricao').innerText = serie.descricao || 'Sem sinopse disponível.';
 
-            // O Ano entra aqui, nas tags gerais da Série!
             document.getElementById('tags').innerHTML = `
                 <span class="detalhes-tag-item">Ano: ${serie.anoLancamento}</span>
                 <span class="detalhes-tag-item">Temporadas: ${serie.qtdTemporadas}</span>
@@ -91,7 +131,6 @@ async function carregarEpisodios(idSerie) {
             seletorHtml += `</select>`;
 
             let listaHtml = `<div id="listaEpisodiosRender" class="temporada-bloco" style="margin-top: 0;"></div>`;
-
             area.innerHTML = seletorHtml + listaHtml;
 
             const seletor = document.getElementById('seletorTemporada');
@@ -116,10 +155,90 @@ async function carregarEpisodios(idSerie) {
             seletor.addEventListener('change', (event) => {
                 renderizarTemporada(event.target.value);
             });
-
             renderizarTemporada(temporadasDisponiveis[0]);
         }
     } catch (e) {
         area.innerHTML = '<p style="color:#e50914;">Erro ao buscar episódios.</p>';
+    }
+}
+
+async function carregarAvaliacoesDaComunidade(id, tipo) {
+    const usuarioLogado = API.getSessao();
+    const container = document.getElementById('listaAvaliacoesRender');
+    try {
+        const res = tipo === 'filme' ? await API.listarAvaliacoesFilme(id) : await API.listarAvaliacoesSerie(id);
+        if (res.ok) {
+            const avaliacoes = await res.json();
+            if(avaliacoes.length === 0) {
+                container.innerHTML = '<p style="color:#aaa;">Nenhuma avaliação ainda. Seja o primeiro a comentar!</p>';
+                return;
+            }
+
+            let html = '';
+            avaliacoes.forEach(a => {
+                const dataFormatada = new Date(a.data).toLocaleDateString('pt-BR');
+
+                let botoesAcao = '';
+                if (usuarioLogado.id === a.idUsuario) {
+                    botoesAcao = `
+                        <div style="margin-top: 10px; display: flex; gap: 10px;">
+                            <button type="button" class="btn-small btn-edit" onclick="prepararEdicaoAvaliacao(${a.idAvaliacao}, ${a.nota}, '${a.comentario.replace(/'/g, "\\'")}')">Editar</button>
+                            <button type="button" class="btn-small btn-danger" onclick="excluirAvaliacaoDaTela(${a.idAvaliacao})">Excluir</button>
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div style="background: #222; padding: 15px; border-radius: 8px; border-left: 3px solid ${usuarioLogado.id === a.idUsuario ? '#4caf50' : '#e50914'};">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <strong style="color: #fff;">${a.avaliador} ${usuarioLogado.id === a.idUsuario ? '(Você)' : ''}</strong>
+                            <span style="color: #888; font-size: 13px;">${dataFormatada}</span>
+                        </div>
+                        <div style="color: #e50914; font-weight: bold; margin-bottom: 8px;">${a.nota} ⭐</div>
+                        <p style="color: #ccc; font-size: 15px;">${a.comentario}</p>
+                        ${botoesAcao}
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+    } catch (e) {
+        console.error("Erro ao carregar avaliações", e);
+    }
+}
+
+function prepararEdicaoAvaliacao(id, notaAtual, comentarioAtual) {
+    idAvaliacaoEditando = id;
+    document.getElementById('tituloFormAvaliacao').innerText = 'Editando sua avaliação';
+    document.getElementById('notaAvaliacao').value = notaAtual;
+    document.getElementById('comentarioAvaliacao').value = comentarioAtual;
+    document.getElementById('btnSubmitAvaliacao').innerText = 'Salvar Alterações';
+    document.getElementById('btnCancelarEdicao').style.display = 'inline-block';
+
+    document.getElementById('areaAvaliacoes').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelarEdicaoAvaliacao() {
+    idAvaliacaoEditando = null;
+    document.getElementById('formAvaliacao').reset();
+    document.getElementById('tituloFormAvaliacao').innerText = 'Deixe sua avaliação';
+    document.getElementById('btnSubmitAvaliacao').innerText = 'Publicar Avaliação';
+    document.getElementById('btnCancelarEdicao').style.display = 'none';
+}
+
+async function excluirAvaliacaoDaTela(idAvaliacao) {
+    if (!confirm("Deseja realmente apagar sua avaliação?")) return;
+
+    const usuarioLogado = API.getSessao();
+    try {
+        const res = await API.deletarAvaliacao(idAvaliacao, usuarioLogado.id);
+        if (res.ok) {
+            const urlParams = new URLSearchParams(window.location.search);
+            carregarAvaliacoesDaComunidade(parseInt(urlParams.get('id')), urlParams.get('tipo'));
+        } else {
+            alert("Erro ao excluir.");
+        }
+    } catch (e) {
+        alert("Erro de conexão.");
     }
 }
