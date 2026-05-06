@@ -5,6 +5,7 @@ import com.bd.cinetracker.model.Serie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 @Repository
@@ -57,5 +58,51 @@ public class SerieRepository {
             s.setAnoLancamento(rs.getInt("ANO_LANCAMENTO"));
             return s;
         }, id);
+    }
+
+    public List<Serie> listarSeriesAcimaDaMedia() {
+        String sql = """
+            SELECT *
+            FROM SERIE
+            WHERE NOTA_IMDB > (
+                SELECT AVG(NOTA_IMDB) 
+                FROM SERIE 
+                WHERE NOTA_IMDB IS NOT NULL
+            )
+        """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Serie s = new Serie();
+            s.setIdMidia(rs.getInt("ID_MIDIA"));
+            s.setTitulo(rs.getString("TITULO"));
+            s.setDescricao(rs.getString("DESCRICAO"));
+            s.setPosterUrl(rs.getString("POSTER_URL"));
+            s.setNotaImdb(rs.getDouble("NOTA_IMDB"));
+            s.setQtdTemporadas(rs.getInt("QTD_TEMPORADAS"));
+            s.setAnoLancamento(rs.getInt("ANO_LANCAMENTO"));
+            return s;
+        });
+    }
+
+    public List<Serie> listarSeriesSemAvaliacao() {
+        String sql = """
+            SELECT s.ID_MIDIA, s.TITULO, s.DESCRICAO, s.POSTER_URL, 
+                   s.NOTA_IMDB, s.QTD_TEMPORADAS, s.ANO_LANCAMENTO
+            FROM SERIE s
+            LEFT JOIN AVALIACAO a ON s.ID_MIDIA = a.FK_SERIE_ID_MIDIA
+            WHERE a.ID_AVALIACAO IS NULL
+        """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Serie s = new Serie();
+            s.setIdMidia(rs.getInt("ID_MIDIA"));
+            s.setTitulo(rs.getString("TITULO"));
+            s.setDescricao(rs.getString("DESCRICAO"));
+            s.setPosterUrl(rs.getString("POSTER_URL"));
+            s.setNotaImdb(rs.getDouble("NOTA_IMDB"));
+            s.setQtdTemporadas(rs.getInt("QTD_TEMPORADAS"));
+            s.setAnoLancamento(rs.getInt("ANO_LANCAMENTO"));
+            return s;
+        });
     }
 }
