@@ -3,8 +3,12 @@ package com.bd.cinetracker.repository;
 import com.bd.cinetracker.model.Filme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 
 @Repository
@@ -13,28 +17,35 @@ public class FilmeRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public int salvar(Filme filme) {
+    public Integer salvar(Filme filme) {
         String sql = """
             INSERT INTO FILME (ID_IMDB, TITULO, DESCRICAO, POSTER_URL, BILHETERIA, DURACAO, ANO_LANCAMENTO, PAIS_ORIGEM, NOTA_IMDB) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
-        return jdbcTemplate.update(
-                sql,
-                filme.getIdImdb(),
-                filme.getTitulo(),
-                filme.getDescricao(),
-                filme.getPosterUrl(),
-                filme.getBilheteria(),
-                filme.getDuracao(),
-                filme.getAnoLancamento(),
-                filme.getPaisOrigem(),
-                filme.getNotaImdb()
-        );
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, filme.getIdImdb());
+            ps.setString(2, filme.getTitulo());
+            ps.setString(3, filme.getDescricao());
+            ps.setString(4, filme.getPosterUrl());
+            ps.setObject(5, filme.getBilheteria());
+            ps.setObject(6, filme.getDuracao());
+            ps.setObject(7, filme.getAnoLancamento());
+            ps.setString(8, filme.getPaisOrigem());
+            ps.setObject(9, filme.getNotaImdb());
+            return ps;
+        }, keyHolder);
+
+        return keyHolder.getKey().intValue();
     }
 
     public List<Filme> buscarPorTitulo(String titulo) {
         String sql = "SELECT * FROM FILME WHERE TITULO LIKE ?";
         String termo = "%" + titulo + "%";
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Filme f = new Filme();
             f.setIdMidia(rs.getInt("ID_MIDIA"));
@@ -69,10 +80,10 @@ public class FilmeRepository {
 
     public int atualizar(Filme filme) {
         String sql = """
-        UPDATE FILME 
-         SET TITULO = ?, DESCRICAO = ?, POSTER_URL = ?, BILHETERIA = ?, DURACAO = ? 
-         WHERE ID_MIDIA = ?
-    """;
+            UPDATE FILME 
+            SET TITULO = ?, DESCRICAO = ?, POSTER_URL = ?, BILHETERIA = ?, DURACAO = ? 
+            WHERE ID_MIDIA = ?
+        """;
         return jdbcTemplate.update(
                 sql,
                 filme.getTitulo(),
@@ -90,7 +101,15 @@ public class FilmeRepository {
     }
 
     public Filme buscarPorId(Integer id) {
-        String sql = "SELECT * FROM FILME WHERE ID_MIDIA = ?";
+        // Usamos LEFT JOIN e GROUP_CONCAT para juntar todos os gêneros em uma string separada por vírgula
+        String sql = """
+            SELECT f.*, GROUP_CONCAT(p.NOME_GENERO SEPARATOR ', ') AS GENEROS
+            FROM FILME f
+            LEFT JOIN PERTENCER p ON f.ID_MIDIA = p.FK_FILME_ID_MIDIA
+            WHERE f.ID_MIDIA = ?
+            GROUP BY f.ID_MIDIA
+        """;
+
         return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
             Filme f = new Filme();
             f.setIdMidia(rs.getInt("ID_MIDIA"));
@@ -102,6 +121,7 @@ public class FilmeRepository {
             f.setBilheteria(rs.getDouble("BILHETERIA"));
             f.setAnoLancamento(rs.getInt("ANO_LANCAMENTO"));
             f.setDuracao(rs.getInt("DURACAO"));
+            f.setGeneros(rs.getString("GENEROS"));
             return f;
         }, id);
     }
@@ -118,7 +138,6 @@ public class FilmeRepository {
             GROUP BY f.ID_MIDIA, f.TITULO, f.POSTER_URL
             HAVING AVG(a.NOTA) >= 4.0
         """;
-
         return jdbcTemplate.query(sql, (rs, rowNum) -> new FilmeMediaDTO(
                 rs.getInt("ID_MIDIA"),
                 rs.getString("TITULO"),
@@ -126,6 +145,7 @@ public class FilmeRepository {
                 rs.getDouble("Media_Avaliacoes")
         ));
     }
+
     // CONSULTA 2: 2 JOINs + WHERE
     public List<FilmeAvaliacaoGeneroDTO> listarFilmesPorGeneroEAvaliacaoAlta(String generoDesejado) {
         String sql = """
@@ -133,7 +153,6 @@ public class FilmeRepository {
             FROM vw_avaliacoes_positivas_com_genero
             WHERE Genero = ?
         """;
-
         return jdbcTemplate.query(sql, (rs, rowNum) -> new FilmeAvaliacaoGeneroDTO(
                 rs.getInt("ID_MIDIA"),
                 rs.getString("TITULO"),
@@ -148,13 +167,12 @@ public class FilmeRepository {
     // CONSULTA 3: ANTI JOIN
     public List<Filme> listarFilmesSemAvaliacao() {
         String sql = """
-            SELECT f.ID_MIDIA, f.ID_IMDB, f.TITULO, f.DESCRICAO, f.POSTER_URL, 
+            SELECT f.ID_MIDIA, f.ID_IMDB, f.TITULO, f.DESCRICAO, f.POSTER_URL,
                    f.BILHETERIA, f.DURACAO, f.ANO_LANCAMENTO, f.PAIS_ORIGEM, f.NOTA_IMDB
             FROM FILME f
             LEFT JOIN AVALIACAO a ON f.ID_MIDIA = a.FK_FILME_ID_MIDIA
             WHERE a.ID_AVALIACAO IS NULL
         """;
-
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Filme f = new Filme();
             f.setIdMidia(rs.getInt("ID_MIDIA"));

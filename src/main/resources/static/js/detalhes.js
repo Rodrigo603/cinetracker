@@ -73,6 +73,7 @@ async function carregarFilme(id) {
             document.getElementById('tags').innerHTML = `
                 <span class="detalhes-tag-item">Ano: ${filme.anoLancamento}</span>
                 <span class="detalhes-tag-item">Duração: ${filme.duracao} min</span>
+                <span class="detalhes-tag-item">Gênero: ${filme.generos || 'Não informado'}</span>
                 <span class="detalhes-tag-item" style="background:#e50914;">⭐ IMDb: ${filme.notaImdb}</span>
             `;
         }
@@ -94,6 +95,7 @@ async function carregarSerie(id) {
             document.getElementById('tags').innerHTML = `
                 <span class="detalhes-tag-item">Ano: ${serie.anoLancamento}</span>
                 <span class="detalhes-tag-item">Temporadas: ${serie.qtdTemporadas}</span>
+                <span class="detalhes-tag-item">Gênero: ${serie.generos || 'Não informado'}</span>
                 <span class="detalhes-tag-item" style="background:#e50914;">⭐ IMDb: ${serie.notaImdb}</span>
             `;
 

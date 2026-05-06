@@ -1,19 +1,23 @@
 package com.bd.cinetracker.controller;
 
 import com.bd.cinetracker.DTOs.FilmeDTO;
+import com.bd.cinetracker.DTOs.SerieDTO;
 import com.bd.cinetracker.model.Admin;
 import com.bd.cinetracker.model.Filme;
+import com.bd.cinetracker.model.Serie;
+import com.bd.cinetracker.model.Usuario;
 import com.bd.cinetracker.repository.AdminRepository;
 import com.bd.cinetracker.repository.FilmeRepository;
+import com.bd.cinetracker.repository.SerieRepository;
 import com.bd.cinetracker.repository.UsuarioRepository;
+import com.bd.cinetracker.repository.GeneroRepository;
 import com.bd.cinetracker.service.OmdbService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.bd.cinetracker.model.Usuario;
 
-import java.util.List;
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -27,6 +31,12 @@ public class AdminController {
 
     @Autowired
     private FilmeRepository filmeRepository;
+
+    @Autowired
+    private SerieRepository serieRepository;
+
+    @Autowired
+    private GeneroRepository generoRepository;
 
     @Autowired
     private OmdbService omdbService;
@@ -60,7 +70,6 @@ public class AdminController {
     @PutMapping("/atualizar/{id}")
     public ResponseEntity<String> atualizarPerfilAdmin(@PathVariable Integer id, @RequestBody AdminRequest request) {
         Admin adminExistente = adminRepository.buscarPorId(id);
-
         if (adminExistente == null) {
             return ResponseEntity.notFound().build();
         }
@@ -73,7 +82,6 @@ public class AdminController {
         }
 
         adminRepository.atualizarPerfilCompleto(adminExistente, request.telefone());
-
         return ResponseEntity.ok("Perfil atualizado com sucesso!");
     }
 
@@ -87,11 +95,11 @@ public class AdminController {
     }
 
     @PostMapping("/filmes")
-    public ResponseEntity<String> adicionarFilme(@RequestBody NovoFilmeRequest request) {
+    public ResponseEntity<String> adicionarMidia(@RequestBody NovoFilmeRequest request) {
         Object resultado = omdbService.buscarMídia(request.titulo());
 
         if (resultado == null) {
-            return ResponseEntity.status(404).body("Filme não encontrado na API do OMDb.");
+            return ResponseEntity.status(404).body("Mídia não encontrada na API do OMDb.");
         }
 
         if (resultado instanceof FilmeDTO dto) {
@@ -117,21 +125,66 @@ public class AdminController {
                     filme.setBilheteria(Double.parseDouble(limpaBilheteria));
                 }
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                System.out.println("Erro ao converter dados numéricos do Filme: " + e.getMessage());
             }
 
-            filmeRepository.salvar(filme);
-            return ResponseEntity.ok("Filme adicionado ao catálogo com sucesso!");
+            Integer idFilmeGerado = filmeRepository.salvar(filme);
+
+            // Salvando Gêneros (FILMES)
+            if (dto.genero() != null && !dto.genero().equals("N/A")) {
+                String[] generos = dto.genero().split(",");
+                for (String nomeGenero : generos) {
+                    String generoTraduzido = traduzirGenero(nomeGenero);
+                    generoRepository.salvarGeneroSeNaoExistir(generoTraduzido);
+                    generoRepository.vincularFilme(idFilmeGerado, generoTraduzido);
+                }
+            }
+            return ResponseEntity.ok("Filme e gêneros adicionados ao catálogo com sucesso!");
         }
 
-        return ResponseEntity.badRequest().body("O título buscado não é um filme.");
+        else if (resultado instanceof SerieDTO dto) {
+            Serie serie = new Serie();
+            serie.setTitulo(dto.titulo());
+            serie.setDescricao(dto.descricao());
+            serie.setPosterUrl(dto.posterUrl());
+            serie.setIdImdb(dto.imdbId());
+            serie.setPaisOrigem(dto.pais());
+
+            try {
+                if (dto.ano() != null && !dto.ano().equals("N/A")) {
+                    serie.setAnoLancamento(Integer.parseInt(dto.ano().substring(0, 4)));
+                }
+                if (dto.qtdTemporadas() != null && !dto.qtdTemporadas().equals("N/A")) {
+                    serie.setQtdTemporadas(Integer.parseInt(dto.qtdTemporadas()));
+                }
+                if (dto.notaImdb() != null && !dto.notaImdb().equals("N/A")) {
+                    serie.setNotaImdb(Double.parseDouble(dto.notaImdb()));
+                }
+            } catch (Exception e) {
+                System.out.println("Erro ao converter dados numéricos da Série: " + e.getMessage());
+            }
+
+            Integer idSerieGerada = serieRepository.salvar(serie);
+
+            // Salvando Gêneros (SÉRIES)
+            if (dto.genero() != null && !dto.genero().equals("N/A")) {
+                String[] generos = dto.genero().split(",");
+                for (String nomeGenero : generos) {
+                    String generoTraduzido = traduzirGenero(nomeGenero);
+                    generoRepository.salvarGeneroSeNaoExistir(generoTraduzido);
+                    generoRepository.vincularSerie(idSerieGerada, generoTraduzido);
+                }
+            }
+            return ResponseEntity.ok("Série e gêneros adicionados ao catálogo com sucesso!");
+        }
+
+        return ResponseEntity.badRequest().body("Tipo de mídia não suportado.");
     }
 
     @PutMapping("/filmes/{id}")
     public ResponseEntity<String> atualizarFilme(@PathVariable Integer id, @RequestBody Filme filme) {
         filme.setIdMidia(id);
         int linhasAfetadas = filmeRepository.atualizar(filme);
-
         if (linhasAfetadas > 0) {
             return ResponseEntity.ok("Filme atualizado com sucesso!");
         }
@@ -141,7 +194,6 @@ public class AdminController {
     @DeleteMapping("/filmes/{id}")
     public ResponseEntity<String> deletarFilme(@PathVariable Integer id) {
         int linhasAfetadas = filmeRepository.deletar(id);
-
         if (linhasAfetadas > 0) {
             return ResponseEntity.ok("Filme removido do catálogo.");
         }
@@ -160,5 +212,34 @@ public class AdminController {
     @GetMapping("/usuarios")
     public ResponseEntity<List<Usuario>> listarUsuarios() {
         return ResponseEntity.ok(usuarioRepository.listarTodos());
+    }
+
+    private String traduzirGenero(String generoIngles) {
+        return switch (generoIngles.trim()) {
+            case "Action" -> "Ação";
+            case "Adventure" -> "Aventura";
+            case "Animation" -> "Animação";
+            case "Biography" -> "Biografia";
+            case "Comedy" -> "Comédia";
+            case "Crime" -> "Crime";
+            case "Documentary" -> "Documentário";
+            case "Drama" -> "Drama";
+            case "Family" -> "Família";
+            case "Fantasy" -> "Fantasia";
+            case "Film-Noir" -> "Film-Noir";
+            case "History" -> "História";
+            case "Horror" -> "Terror";
+            case "Music" -> "Música";
+            case "Musical" -> "Musical";
+            case "Mystery" -> "Mistério";
+            case "Romance" -> "Romance";
+            case "Sci-Fi" -> "Ficção Científica";
+            case "Short" -> "Curta-metragem";
+            case "Sport" -> "Esporte";
+            case "Thriller" -> "Suspense";
+            case "War" -> "Guerra";
+            case "Western" -> "Faroeste";
+            default -> generoIngles.trim();
+        };
     }
 }

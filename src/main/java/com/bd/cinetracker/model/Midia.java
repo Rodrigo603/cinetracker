@@ -15,6 +15,7 @@ public abstract class Midia {
     private Double notaImdb;
     private Integer fkUsuario;
     private Boolean assistido = false;
+    private String generos;
 
     public Midia() {}
 
@@ -120,6 +121,14 @@ public abstract class Midia {
 
     public void setAssistido(Boolean assistido) {
         this.assistido = assistido;
+    }
+
+    public String getGeneros() {
+        return generos;
+    }
+
+    public void setGeneros(String generos) {
+        this.generos = generos;
     }
 
     @Override

@@ -14,5 +14,6 @@ public record SerieDTO(
         @JsonProperty("Country") String pais,
         @JsonProperty("imdbID") String imdbId,
         @JsonProperty("Poster") String posterUrl,
-        @JsonProperty("Type") String tipo
+        @JsonProperty("Type") String tipo,
+        @JsonProperty("Genre") String genero
 ) {}
