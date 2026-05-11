@@ -5,18 +5,114 @@
     <title>Painel Administrativo - CineTracker</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .admin-grid { display: flex; flex-direction: column; gap: 30px; }
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 0;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: color 0.2s, border-color 0.2s;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .tab-btn:hover { color: #e5e5e5; }
+        .tab-btn.active { color: #e50914; border-bottom-color: #e50914; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .admin-grid { display: flex; flex-direction: column; gap: 24px; }
         .action-buttons { display: flex; gap: 10px; }
         .hidden { display: none; }
-        .form-section { border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; }
-        .editing-mode { border: 2px solid #e50914 !important; box-shadow: 0 0 20px rgba(229, 9, 20, 0.2); }
-        textarea.custom-textarea { width: 100%; padding: 16px; background-color: #2b2b2b; border: 1px solid transparent; border-radius: 6px; color: #fff; font-size: 16px; margin-top: 5px; resize: vertical; font-family: inherit; }
-        textarea.custom-textarea:focus { outline: none; border: 1px solid #e50914; background-color: #333; }
-        /* Estilo extra para a mensagem de busca vazia */
-        #msgBuscaVazia { text-align: center; color: #888; margin-top: 20px; font-weight: 500; }
+        .form-section { border-top: 1px solid #2a2a2a; padding-top: 24px; margin-top: 8px; }
+        textarea.custom-textarea {
+            width: 100%; padding: 16px;
+            background-color: #2b2b2b; border: 1px solid transparent;
+            border-radius: 6px; color: #fff; font-size: 16px;
+            margin-top: 5px; resize: vertical; font-family: inherit;
+        }
+        textarea.custom-textarea:focus { outline: none; border-color: #e50914; background-color: #333; }
+        .type-toggle {
+            display: flex;
+            background: #222;
+            border-radius: 8px;
+            padding: 4px;
+            width: fit-content;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        .type-toggle button {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .type-toggle button.active { background: #e50914; color: #fff; }
+        .search-bar-row { display: flex; gap: 10px; margin-bottom: 16px; }
+        .search-bar-row input { flex: 1; }
+        .comment-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+        .comment-card {
+            background: #1e1e1e;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            transition: border-color 0.2s;
+        }
+        .comment-card:hover { border-color: #444; }
+        .comment-card.deleting { opacity: 0.4; pointer-events: none; }
+        .comment-meta { font-size: 12px; color: #666; margin-bottom: 6px; }
+        .comment-text { font-size: 14px; color: #ccc; line-height: 1.5; }
+        .comment-nota { font-size: 13px; font-weight: 700; color: #f5c518; margin-top: 6px; }
+        .comment-actions { flex-shrink: 0; }
+        .empty-state { text-align: center; color: #555; padding: 40px 0; font-size: 14px; }
+        .empty-state span { display: block; font-size: 32px; margin-bottom: 10px; }
+        #toast {
+            position: fixed;
+            bottom: 30px; right: 30px;
+            background: #1e1e1e;
+            color: #e5e5e5;
+            border: 1px solid #333;
+            border-left: 4px solid #e50914;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 9999;
+            max-width: 320px;
+        }
+        #toast.show { opacity: 1; transform: translateY(0); }
+        #toast.success { border-left-color: #22c55e; }
+        #toast.error   { border-left-color: #e50914; }
+        .editing-mode { border: 2px solid #e50914 !important; box-shadow: 0 0 20px rgba(229,9,20,0.2); }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .count-pill { background: #2a2a2a; color: #888; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+        #msgBuscaVazia { text-align: center; color: #555; margin-top: 20px; font-size: 14px; }
     </style>
 </head>
 <body>
+
 <nav>
     <a href="home.html" class="logo">CineTracker</a>
     <div class="nav-links">
@@ -27,93 +123,168 @@
     </div>
 </nav>
 
-<div class="content-section admin-grid">
+<div class="content-section">
 
-    <div class="form-card" id="form-midia-container">
-        <h2 id="titulo-form-midia">Adicionar Filme</h2>
-        <form id="formMidia" onsubmit="adicionarMidia(event)">
-            <div class="input-group">
-                <label>Qual filme pretende adicionar? (Busca automática no OMDb)</label>
-                <input type="text" id="tituloMedia" placeholder="Ex: The Matrix" required>
-            </div>
-            <div class="action-buttons">
-                <button type="submit" class="btn-primary" id="btn-salvar-midia">Adicionar ao Catálogo</button>
-            </div>
-        </form>
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="mudarAba('catalogo', this)"> Catálogo</button>
+        <button class="tab-btn"        onclick="mudarAba('comentarios', this)"> Comentários</button>
+        <button class="tab-btn"        onclick="mudarAba('usuarios', this)"> Usuários</button>
+        <button class="tab-btn"        onclick="mudarAba('admins', this)"> Administradores</button>
     </div>
 
-    <div class="form-card hidden" id="form-editar-container">
-        <h2>Editar Dados do Filme</h2>
-        <form id="formEditarMidia" onsubmit="salvarEdicao(event)">
-            <input type="hidden" id="editIdMidia">
-            <input type="hidden" id="editDuracao">
-            <input type="hidden" id="editBilheteria">
+    <div id="tab-catalogo" class="tab-panel active admin-grid">
 
-            <div class="input-group">
-                <label>Título do Filme</label>
-                <input type="text" id="editTitulo" required>
+        <div class="form-card" id="form-midia-container">
+            <h2>Adicionar Mídia via OMDb</h2>
+            <div class="type-toggle">
+                <button type="button" class="active" id="btn-tipo-filme" onclick="selecionarTipo('filme')"> Filme</button>
+                <button type="button" id="btn-tipo-serie" onclick="selecionarTipo('serie')"> Série</button>
             </div>
-            <div class="input-group">
-                <label>Descrição / Sinopse</label>
-                <textarea id="editDescricao" class="custom-textarea" rows="5" required></textarea>
-            </div>
-            <div class="input-group">
-                <label>URL do Pôster</label>
-                <input type="text" id="editPoster" required>
-            </div>
-            <div class="action-buttons">
-                <button type="submit" class="btn-primary">Salvar Alterações</button>
-                <button type="button" class="btn-secondary" onclick="cancelarEdicao()">Cancelar</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="form-card">
-        <h2>Filmes Cadastrados</h2>
-
-        <div class="input-group">
-            <input type="text" id="inputBuscaFilme" placeholder="Pesquisar filme por título..." onkeyup="filtrarFilmes()">
+            <form id="formMidia" onsubmit="adicionarMidia(event)">
+                <div class="input-group">
+                    <label id="label-busca">Qual filme pretende adicionar? (Busca automática no OMDb)</label>
+                    <input type="text" id="tituloMedia" placeholder="Ex: The Matrix" required>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn-primary" id="btn-salvar-midia">Adicionar ao Catálogo</button>
+                </div>
+            </form>
         </div>
 
-        <table style="table-layout: fixed; width: 100%;">
-            <thead>
-            <tr>
-                <th style="width: 15%;">ID</th>
-                <th style="width: 55%;">Título</th>
-                <th style="width: 30%;">Ações</th>
-            </tr>
-            </thead>
-            <tbody id="listaFilmesTbody"></tbody>
-        </table>
+        <div class="form-card hidden" id="form-editar-container">
+            <h2>Editar Dados do Filme</h2>
+            <form id="formEditarMidia" onsubmit="salvarEdicao(event)">
+                <input type="hidden" id="editIdMidia">
+                <input type="hidden" id="editDuracao">
+                <input type="hidden" id="editBilheteria">
+                <div class="input-group">
+                    <label>Título do Filme</label>
+                    <input type="text" id="editTitulo" required>
+                </div>
+                <div class="input-group">
+                    <label>Descrição / Sinopse</label>
+                    <textarea id="editDescricao" class="custom-textarea" rows="5" required></textarea>
+                </div>
+                <div class="input-group">
+                    <label>URL do Pôster</label>
+                    <input type="text" id="editPoster" required>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn-primary">Salvar Alterações</button>
+                    <button type="button" class="btn-secondary" onclick="cancelarEdicao()">Cancelar</button>
+                </div>
+            </form>
+        </div>
 
-        <p id="msgBuscaVazia" style="display: none;">Filme não cadastrado.</p>
-    </div>
+        <div class="form-card">
+            <div class="section-header">
+                <h2>Filmes Cadastrados</h2>
+                <span class="count-pill" id="count-filmes">0 filmes</span>
+            </div>
+            <div class="search-bar-row input-group" style="margin-bottom:16px;">
+                <input type="text" id="inputBuscaFilme" placeholder="Pesquisar por título..." onkeyup="filtrarFilmes()">
+            </div>
+            <table style="table-layout:fixed;width:100%;">
+                <thead>
+                <tr>
+                    <th style="width:10%;">ID</th>
+                    <th style="width:58%;">Título</th>
+                    <th style="width:32%;">Ações</th>
+                </tr>
+                </thead>
+                <tbody id="listaFilmesTbody"></tbody>
+            </table>
+            <p id="msgBuscaVazia" style="display:none;">Nenhum filme encontrado.</p>
+        </div>
 
-    <div class="form-card form-section">
-        <h2>Adicionar Novo Administrador</h2>
-        <form onsubmit="criarNovoAdmin(event)">
-            <div class="input-group"><label>Nome Completo</label><input type="text"     id="nomeAdmin"  required></div>
-            <div class="input-group"><label>E-mail (deve conter 'admin')</label><input type="email"    id="emailAdmin" required></div>
-            <div class="input-group"><label>Telefone</label><input type="tel"      id="telAdmin"   required></div>
-            <div class="input-group"><label>Senha</label><input type="password" id="senhaAdmin" required></div>
-            <button type="submit" class="btn-primary">Cadastrar Administrador</button>
-        </form>
-    </div>
-
-    <div class="form-card">
-        <h2>Remover Conta do Sistema</h2>
-        <p style="color: #888; font-size: 14px; margin-bottom: 15px;">
-            Remova administradores ou utilizadores comuns permanentemente através do ID.
-        </p>
-        <div style="display: flex; gap: 10px;">
-            <input type="number" id="idUsuarioExcluir" placeholder="Digite o ID (Ex: 4)"
-                   style="flex: 1; padding: 12px; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 4px;">
-            <button class="btn-primary"
-                    style="background-color: #e50914; width: auto; padding: 0 25px;"
-                    onclick="excluirUsuario()">Excluir Permanentemente</button>
+        <div class="form-card">
+            <div class="section-header">
+                <h2>Séries Cadastradas</h2>
+                <span class="count-pill" id="count-series">0 séries</span>
+            </div>
+            <div class="search-bar-row input-group" style="margin-bottom:16px;">
+                <input type="text" id="inputBuscaSerie" placeholder="Pesquisar por título..." onkeyup="filtrarSeries()">
+            </div>
+            <table style="table-layout:fixed;width:100%;">
+                <thead>
+                <tr>
+                    <th style="width:10%;">ID</th>
+                    <th style="width:48%;">Título</th>
+                    <th style="width:12%;">Temp.</th>
+                    <th style="width:30%;">Ações</th>
+                </tr>
+                </thead>
+                <tbody id="listaSeriesTbody"></tbody>
+            </table>
+            <p id="msgBuscaSerieVazia" style="display:none;">Nenhuma série encontrada.</p>
         </div>
     </div>
+
+    <div id="tab-comentarios" class="tab-panel admin-grid">
+        <div class="form-card">
+            <div class="section-header">
+                <h2>Buscar Comentários</h2>
+            </div>
+            <p style="color:#666;font-size:13px;margin-bottom:20px;">
+                Informe o ID de um filme ou série para listar e gerenciar seus comentários.
+            </p>
+            <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                <div class="input-group" style="margin:0;flex:1;min-width:140px;">
+                    <label style="font-size:12px;color:#888;display:block;margin-bottom:6px;">Tipo de Mídia</label>
+                    <select id="tipoComentario" style="width:100%;padding:14px;background:#2b2b2b;border:1px solid transparent;border-radius:6px;color:#fff;font-size:15px;">
+                        <option value="filme"> Filme</option>
+                        <option value="serie"> Série</option>
+                    </select>
+                </div>
+                <div class="input-group" style="margin:0;flex:1;min-width:140px;">
+                    <label style="font-size:12px;color:#888;display:block;margin-bottom:6px;">ID da Mídia</label>
+                    <input type="number" id="idMidiaComentario" placeholder="Ex: 3" min="1"
+                           style="width:100%;padding:14px;background:#2b2b2b;border:1px solid transparent;border-radius:6px;color:#fff;font-size:15px;">
+                </div>
+                <button class="btn-primary" style="width:auto;padding:14px 28px;margin-bottom:0;" onclick="buscarComentarios()">
+                    Buscar
+                </button>
+            </div>
+            <div id="resultado-comentarios" style="margin-top:20px;">
+                <div class="empty-state">
+                    Busque os comentários de um filme ou série pelo ID acima.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-usuarios" class="tab-panel admin-grid">
+        <div class="form-card">
+            <h2>Remover Conta de Usuário</h2>
+            <p style="color:#666;font-size:13px;margin-bottom:20px;">
+                Remove permanentemente um utilizador do sistema através do ID.
+            </p>
+            <div style="display:flex;gap:10px;">
+                <input type="number" id="idUsuarioExcluir" placeholder="ID do usuário (Ex: 4)" min="1"
+                       style="flex:1;padding:14px;background:#2b2b2b;border:1px solid #333;border-radius:6px;color:#fff;font-size:15px;">
+                <button class="btn-primary" style="width:auto;padding:0 28px;background:#e50914;" onclick="excluirUsuario()">
+                    Excluir Permanentemente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-admins" class="tab-panel admin-grid">
+        <div class="form-card">
+            <h2>Adicionar Novo Administrador</h2>
+            <form onsubmit="criarNovoAdmin(event)">
+                <div class="input-group"><label>Nome Completo</label><input type="text"      id="nomeAdmin"  required></div>
+                <div class="input-group"><label>E-mail</label>        <input type="email"    id="emailAdmin" required></div>
+                <div class="input-group"><label>Telefone</label>      <input type="tel"      id="telAdmin"   required></div>
+                <div class="input-group"><label>Senha</label>         <input type="password" id="senhaAdmin" required></div>
+                <button type="submit" class="btn-primary">Cadastrar Administrador</button>
+            </form>
+        </div>
+    </div>
+
 </div>
+
+<div id="toast"></div>
 
 <script src="js/api.js"></script>
 <script src="js/admin.js"></script>

@@ -11,6 +11,7 @@ import com.bd.cinetracker.repository.FilmeRepository;
 import com.bd.cinetracker.repository.SerieRepository;
 import com.bd.cinetracker.repository.UsuarioRepository;
 import com.bd.cinetracker.repository.GeneroRepository;
+import com.bd.cinetracker.repository.AvaliacaoRepository;
 import com.bd.cinetracker.service.OmdbService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,9 @@ public class AdminController {
 
     @Autowired
     private GeneroRepository generoRepository;
+
+    @Autowired
+    private AvaliacaoRepository avaliacaoRepository;
 
     @Autowired
     private OmdbService omdbService;
@@ -90,6 +94,57 @@ public class AdminController {
         int linhasAfetadas = usuarioRepository.deletar(id);
         if (linhasAfetadas > 0) {
             return ResponseEntity.ok("Usuário deletado com sucesso do sistema.");
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/series")
+    public ResponseEntity<String> adicionarSerie(@RequestBody NovoFilmeRequest request) {
+        SerieDTO dto = omdbService.buscarSerie(request.titulo());
+
+        if (dto == null) {
+            return ResponseEntity.status(404).body("Série não encontrada na API do OMDb.");
+        }
+
+        Serie serie = new Serie();
+        serie.setTitulo(dto.titulo());
+        serie.setDescricao(dto.descricao());
+        serie.setPosterUrl(dto.posterUrl());
+        serie.setIdImdb(dto.imdbId());
+        serie.setPaisOrigem(dto.pais());
+
+        try {
+            if (dto.ano() != null && !dto.ano().equals("N/A")) {
+                serie.setAnoLancamento(Integer.parseInt(dto.ano().substring(0, 4)));
+            }
+            if (dto.qtdTemporadas() != null && !dto.qtdTemporadas().equals("N/A")) {
+                serie.setQtdTemporadas(Integer.parseInt(dto.qtdTemporadas()));
+            }
+            if (dto.notaImdb() != null && !dto.notaImdb().equals("N/A")) {
+                serie.setNotaImdb(Double.parseDouble(dto.notaImdb()));
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao converter dados numéricos da Série: " + e.getMessage());
+        }
+
+        Integer idSerieGerada = serieRepository.salvar(serie);
+
+        if (dto.genero() != null && !dto.genero().equals("N/A")) {
+            String[] generos = dto.genero().split(",");
+            for (String nomeGenero : generos) {
+                String generoTraduzido = traduzirGenero(nomeGenero);
+                generoRepository.salvarGeneroSeNaoExistir(generoTraduzido);
+                generoRepository.vincularSerie(idSerieGerada, generoTraduzido);
+            }
+        }
+        return ResponseEntity.ok("Série e gêneros adicionados ao catálogo com sucesso!");
+    }
+
+    @DeleteMapping("/series/{id}")
+    public ResponseEntity<String> deletarSerie(@PathVariable Integer id) {
+        int linhasAfetadas = serieRepository.deletar(id);
+        if (linhasAfetadas > 0) {
+            return ResponseEntity.ok("Série removida do catálogo.");
         }
         return ResponseEntity.notFound().build();
     }
@@ -241,5 +296,13 @@ public class AdminController {
             case "Western" -> "Faroeste";
             default -> generoIngles.trim();
         };
+    }
+    @DeleteMapping("/comentarios/{idAvaliacao}")
+    public ResponseEntity<String> deletarComentario(@PathVariable Integer idAvaliacao) {
+        int deletados = avaliacaoRepository.deletarComoAdmin(idAvaliacao);
+        if (deletados > 0) {
+            return ResponseEntity.ok("Comentário removido com sucesso pelo administrador.");
+        }
+        return ResponseEntity.status(404).body("Avaliação não encontrada.");
     }
 }

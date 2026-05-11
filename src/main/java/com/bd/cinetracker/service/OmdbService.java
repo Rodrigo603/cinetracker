@@ -34,4 +34,17 @@ public class OmdbService {
             return restClient.get().uri(url).retrieve().body(FilmeDTO.class);
         }
     }
+
+    public SerieDTO buscarSerie(String nome) {
+        String busca = nome.replace(" ", "+");
+        String url = "https://www.omdbapi.com/?t=" + busca + "&type=series&apikey=" + apiKey;
+
+        JsonNode json = restClient.get().uri(url).retrieve().body(JsonNode.class);
+
+        if (json == null || json.get("Response").asText().equals("False")) {
+            return null;
+        }
+
+        return restClient.get().uri(url).retrieve().body(SerieDTO.class);
+    }
 }

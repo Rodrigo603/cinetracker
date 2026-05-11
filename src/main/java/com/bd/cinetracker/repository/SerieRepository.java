@@ -18,6 +18,10 @@ public class SerieRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    public int deletar(Integer id) {
+        return jdbcTemplate.update("DELETE FROM SERIE WHERE ID_MIDIA = ?", id);
+    }
+
     public Integer salvar(Serie serie) {
         String sql = """
             INSERT INTO SERIE (ID_IMDB, TITULO, DESCRICAO, POSTER_URL, QTD_TEMPORADAS, ANO_LANCAMENTO, PAIS_ORIGEM, NOTA_IMDB) 

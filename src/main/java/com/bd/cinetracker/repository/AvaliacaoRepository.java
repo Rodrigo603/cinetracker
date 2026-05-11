@@ -44,4 +44,8 @@ public class AvaliacaoRepository {
                 rs.getDouble("NOTA"), rs.getString("COMENTARIO"), rs.getTimestamp("DATA_AVALIACAO")
         ), idSerie);
     }
+    public int deletarComoAdmin(Integer idAvaliacao) {
+        String sql = "DELETE FROM AVALIACAO WHERE ID_AVALIACAO = ?";
+        return jdbcTemplate.update(sql, idAvaliacao);
+    }
 }
