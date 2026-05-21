@@ -38,6 +38,15 @@
         <div id="userBadge" class="role-badge">Usuário</div>
     </div>
 
+    <div style="text-align: center; margin-bottom: 20px;" id="area-estatisticas">
+        <h3 style="color: #ccc; font-weight: 500;">Você já fez <span id="contador-avaliacoes" style="color: #e50914; font-weight: bold; font-size: 24px;">0</span> avaliações na plataforma.</h3>
+    </div>
+
+    <div class="form-card" style="margin-bottom: 20px; text-align: center;" id="area-relatorio">
+        <button type="button" class="btn-primary" onclick="carregarRelatorioHistorico()" style="width: auto; padding: 10px 30px;">Gerar Histórico Completo de Avaliações</button>
+        <pre id="texto-relatorio" style="display:none; background-color: #222; color: #fff; padding: 20px; margin-top: 20px; border-radius: 8px; text-align: left; overflow-x: auto; font-size: 14px; line-height: 1.6;"></pre>
+    </div>
+
     <div class="form-card">
         <form id="formPerfil" onsubmit="salvarPerfil(event)">
             <div class="input-group">

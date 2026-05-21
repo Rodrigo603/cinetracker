@@ -39,14 +39,22 @@ const API = (() => {
     async function listarAvaliacoesSerie(id)        { return _request('GET',    `/avaliacoes/serie/${id}`); }
     async function deletarComentarioAdmin(id)       { return _request('DELETE', `/admin/comentarios/${id}`); }
 
+    async function listarUsuariosAdmin()            { return _request('GET', '/admin/usuarios'); }
+    async function buscarFilmeBackend(titulo)       { return _request('GET', `/filmes/buscar?titulo=${encodeURIComponent(titulo)}`); }
+    async function buscarSerieBackend(titulo)       { return _request('GET', `/series/buscar?titulo=${encodeURIComponent(titulo)}`); }
+
+    async function gerarRelatorioUsuario(id)        { return _request('GET', `/usuarios/${id}/relatorio`); }
+    async function buscarEstatisticasUsuario(id)    { return _request('GET', `/usuarios/${id}/estatisticas`); }
+
     return {
         getSessao, setSessao, encerrarSessao,
-        loginAdmin, loginUsuario, cadastrarUsuario, buscarUsuario, atualizarUsuario, excluirUsuario,
+        loginAdmin, loginUsuario, cadastrarUsuario, buscarUsuario, atualizarUsuario,
         criarAdmin, buscarAdmin, atualizarAdmin,
         listarFilmes, buscarFilmePorId, criarFilme, atualizarFilme, deletarFilme,
         listarSeries, buscarSeriePorId, listarEpisodiosDaSerie, criarSerie, deletarSerie,
         criarAvaliacao, atualizarAvaliacao, deletarAvaliacao,
         listarAvaliacoesFilme, listarAvaliacoesSerie,
-        deletarComentarioAdmin
+        deletarComentarioAdmin, listarUsuariosAdmin, buscarFilmeBackend, buscarSerieBackend,
+        gerarRelatorioUsuario, buscarEstatisticasUsuario
     };
 })();

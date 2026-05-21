@@ -23,10 +23,6 @@ public class FilmeController {
     @GetMapping("/buscar")
     public ResponseEntity<List<Filme>> buscarFilmePorTitulo(@RequestParam String titulo) {
         List<Filme> filmes = filmeRepository.buscarPorTitulo(titulo);
-
-        if (filmes.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(filmes);
     }
 

@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 if(res.ok) {
                     cancelarEdicaoAvaliacao();
                     carregarAvaliacoesDaComunidade(id, tipo);
+                    tipo === 'filme' ? carregarFilme(id) : carregarSerie(id);
                 } else {
                     alert("Erro ao editar avaliação.");
                 }
@@ -50,6 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 if(res.ok) {
                     document.getElementById('comentarioAvaliacao').value = '';
                     carregarAvaliacoesDaComunidade(id, tipo);
+                    tipo === 'filme' ? carregarFilme(id) : carregarSerie(id);
                 } else {
                     alert("Erro ao publicar avaliação.");
                 }
@@ -75,6 +77,7 @@ async function carregarFilme(id) {
                 <span class="detalhes-tag-item">Duração: ${filme.duracao} min</span>
                 <span class="detalhes-tag-item">Gênero: ${filme.generos || 'Não informado'}</span>
                 <span class="detalhes-tag-item" style="background:#e50914;">⭐ IMDb: ${filme.notaImdb}</span>
+                <span class="detalhes-tag-item" style="background:#e50914;">🎬 CineTracker: ${Number(filme.avaliacao || 0).toFixed(1)}</span>
             `;
         }
     } catch (e) {
@@ -97,6 +100,7 @@ async function carregarSerie(id) {
                 <span class="detalhes-tag-item">Temporadas: ${serie.qtdTemporadas}</span>
                 <span class="detalhes-tag-item">Gênero: ${serie.generos || 'Não informado'}</span>
                 <span class="detalhes-tag-item" style="background:#e50914;">⭐ IMDb: ${serie.notaImdb}</span>
+                <span class="detalhes-tag-item" style="background:#e50914;">📺 CineTracker: ${Number(serie.avaliacao || 0).toFixed(1)}</span>
             `;
 
             carregarEpisodios(id);
@@ -236,7 +240,11 @@ async function excluirAvaliacaoDaTela(idAvaliacao) {
         const res = await API.deletarAvaliacao(idAvaliacao, usuarioLogado.id);
         if (res.ok) {
             const urlParams = new URLSearchParams(window.location.search);
-            carregarAvaliacoesDaComunidade(parseInt(urlParams.get('id')), urlParams.get('tipo'));
+            const idMidia = parseInt(urlParams.get('id'));
+            const tipoMidia = urlParams.get('tipo');
+
+            carregarAvaliacoesDaComunidade(idMidia, tipoMidia);
+            tipoMidia === 'filme' ? carregarFilme(idMidia) : carregarSerie(idMidia);
         } else {
             alert("Erro ao excluir.");
         }

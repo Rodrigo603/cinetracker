@@ -49,7 +49,6 @@ public class UsuarioRepository {
         );
     }
 
-
     public void atualizarPerfilCompleto(Usuario usuario, String novoTelefone) {
         String sqlUsuario = "UPDATE USUARIO SET NOME = ?, EMAIL = ?, SENHA = ? WHERE ID_USER = ?";
         jdbcTemplate.update(sqlUsuario,
@@ -124,5 +123,16 @@ public class UsuarioRepository {
                 rs.getDate("DT_CADASTRO").toLocalDate(),
                 rs.getInt("FK_TELEFONE_TELEFONE_PK")
         ));
+    }
+
+    public String gerarRelatorioAvaliacoes(Integer idUsuario) {
+        String callProcedure = "CALL gerar_relatorio_usuario(?, @relatorio)";
+        jdbcTemplate.update(callProcedure, idUsuario);
+        return jdbcTemplate.queryForObject("SELECT @relatorio", String.class);
+    }
+
+    public int buscarTotalAvaliacoes(Integer idUsuario) {
+        String sql = "SELECT total_avaliacoes_usuario(?)";
+        return jdbcTemplate.queryForObject(sql, Integer.class, idUsuario);
     }
 }

@@ -35,4 +35,10 @@ public class SerieController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Serie>> buscarPorTitulo(@RequestParam String titulo) {
+        List<Serie> series = serieRepository.buscarPorTitulo(titulo);
+        return ResponseEntity.ok(series);
+    }
 }

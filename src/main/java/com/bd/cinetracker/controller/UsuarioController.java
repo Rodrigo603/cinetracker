@@ -68,4 +68,16 @@ public class UsuarioController {
         }
         return ResponseEntity.ok(new LoginResponse(u.getId(), u.getNome(), u.getEmail(), false));
     }
+
+    @GetMapping("/{id}/relatorio")
+    public ResponseEntity<String> obterRelatorio(@PathVariable Integer id) {
+        String relatorio = usuarioRepository.gerarRelatorioAvaliacoes(id);
+        return ResponseEntity.ok(relatorio != null ? relatorio : "Nenhuma avaliação encontrada.");
+    }
+
+    @GetMapping("/{id}/estatisticas")
+    public ResponseEntity<Integer> obterEstatisticas(@PathVariable Integer id) {
+        int total = usuarioRepository.buscarTotalAvaliacoes(id);
+        return ResponseEntity.ok(total);
+    }
 }

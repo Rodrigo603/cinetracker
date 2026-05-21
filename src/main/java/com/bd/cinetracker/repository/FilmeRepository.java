@@ -58,6 +58,7 @@ public class FilmeRepository {
             f.setAnoLancamento(rs.getInt("ANO_LANCAMENTO"));
             f.setPaisOrigem(rs.getString("PAIS_ORIGEM"));
             f.setNotaImdb(rs.getDouble("NOTA_IMDB"));
+            f.setAvaliacao(rs.getDouble("AVALIACAO")); // Leitura para trigger
             return f;
         }, termo);
     }
@@ -101,7 +102,6 @@ public class FilmeRepository {
     }
 
     public Filme buscarPorId(Integer id) {
-        // Usamos LEFT JOIN e GROUP_CONCAT para juntar todos os gêneros em uma string separada por vírgula
         String sql = """
             SELECT f.*, GROUP_CONCAT(p.NOME_GENERO SEPARATOR ', ') AS GENEROS
             FROM FILME f
@@ -122,6 +122,7 @@ public class FilmeRepository {
             f.setAnoLancamento(rs.getInt("ANO_LANCAMENTO"));
             f.setDuracao(rs.getInt("DURACAO"));
             f.setGeneros(rs.getString("GENEROS"));
+            f.setAvaliacao(rs.getDouble("AVALIACAO")); // Leitura para trigger
             return f;
         }, id);
     }
@@ -129,7 +130,6 @@ public class FilmeRepository {
     public record FilmeMediaDTO(Integer idMidia, String titulo, String posterUrl, Double media) {}
     public record FilmeAvaliacaoGeneroDTO(Integer idMidia, String titulo, String posterUrl, Integer ano, String genero, Double notaUsuario, String comentario) {}
 
-    // CONSULTA 1: JOIN + GROUP BY + HAVING
     public List<FilmeMediaDTO> listarFilmesComMediaAlta() {
         String sql = """
             SELECT f.ID_MIDIA, f.TITULO, f.POSTER_URL, AVG(a.NOTA) AS Media_Avaliacoes
@@ -146,13 +146,21 @@ public class FilmeRepository {
         ));
     }
 
-    // CONSULTA 2: 2 JOINs + WHERE
     public List<FilmeAvaliacaoGeneroDTO> listarFilmesPorGeneroEAvaliacaoAlta(String generoDesejado) {
         String sql = """
-            SELECT ID_MIDIA, Filme AS TITULO, POSTER_URL, ANO_LANCAMENTO, Genero AS NOME_GENERO, NOTA AS Nota_Usuario, COMENTARIO
-            FROM vw_avaliacoes_positivas_com_genero
-            WHERE Genero = ?
+            SELECT v.ID_MIDIA, 
+                   MAX(v.Filme) AS TITULO, 
+                   MAX(v.POSTER_URL) AS POSTER_URL, 
+                   MAX(v.ANO_LANCAMENTO) AS ANO_LANCAMENTO, 
+                   v.Genero AS NOME_GENERO, 
+                   f.AVALIACAO AS Nota_Usuario, 
+                   'Média Geral Alta' AS COMENTARIO
+            FROM vw_avaliacoes_positivas_com_genero v
+            JOIN FILME f ON v.ID_MIDIA = f.ID_MIDIA
+            WHERE v.Genero = ? AND f.AVALIACAO >= 4.0
+            GROUP BY v.ID_MIDIA, v.Genero, f.AVALIACAO
         """;
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> new FilmeAvaliacaoGeneroDTO(
                 rs.getInt("ID_MIDIA"),
                 rs.getString("TITULO"),
@@ -164,7 +172,6 @@ public class FilmeRepository {
         ), generoDesejado);
     }
 
-    // CONSULTA 3: ANTI JOIN
     public List<Filme> listarFilmesSemAvaliacao() {
         String sql = """
             SELECT f.ID_MIDIA, f.ID_IMDB, f.TITULO, f.DESCRICAO, f.POSTER_URL,

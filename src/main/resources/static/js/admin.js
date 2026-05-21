@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!u || !u.admin) { window.location.href = 'home.html'; return; }
     carregarFilmes();
     carregarSeries();
+    carregarUsuarios();
 });
 
 function mudarAba(nomeAba, btnClicado) {
@@ -317,19 +318,6 @@ async function deletarComentarioDireto() {
     }
 }
 
-async function excluirUsuario() {
-    const id = document.getElementById('idUsuarioExcluir').value;
-    if (!id) { mostrarToast('Informe um ID válido.', 'error'); return; }
-    if (!confirm(`Excluir permanentemente o usuário ID ${id}?`)) return;
-
-    const res = await API.excluirUsuario(id);
-    if (res.ok) {
-        mostrarToast('Usuário removido com sucesso.', 'success');
-        document.getElementById('idUsuarioExcluir').value = '';
-    } else {
-        mostrarToast('Erro ao excluir. Verifique se o ID existe.', 'error');
-    }
-}
 
 async function criarNovoAdmin(event) {
     event.preventDefault();
@@ -345,5 +333,47 @@ async function criarNovoAdmin(event) {
         event.target.reset();
     } else {
         mostrarToast('Erro ao cadastrar. Verifique os dados.', 'error');
+    }
+}
+
+
+async function carregarUsuarios() {
+    try {
+        const res = await API.listarUsuariosAdmin();
+        if (!res.ok) return;
+        const usuarios = await res.json();
+        const tbody = document.getElementById('listaUsuariosTbody');
+        const count = document.getElementById('count-usuarios');
+        tbody.innerHTML = '';
+        count.textContent = usuarios.length + ' usuário(s)';
+
+        if (usuarios.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhum usuário encontrado.</td></tr>';
+            return;
+        }
+
+        usuarios.forEach(u => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${u.id}</td>
+                <td>${u.nome}</td>
+                <td>${u.email}</td>
+                <td>
+                    <button class="btn-small btn-danger" onclick="excluirUsuarioDireto(${u.id})">Excluir</button>
+                </td>`;
+            tbody.appendChild(tr);
+        });
+    } catch (err) { console.error("Erro ao carregar usuários:", err); }
+}
+
+async function excluirUsuarioDireto(id) {
+    if (!confirm(`Excluir permanentemente o usuário ID ${id}? Esta ação não tem volta.`)) return;
+
+    const res = await API.excluirUsuario(id);
+    if (res.ok) {
+        mostrarToast('Usuário removido com sucesso.', 'success');
+        carregarUsuarios();
+    } else {
+        mostrarToast('Erro ao excluir usuário.', 'error');
     }
 }

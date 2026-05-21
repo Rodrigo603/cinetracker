@@ -46,6 +46,22 @@ public class SerieRepository {
         return keyHolder.getKey().intValue();
     }
 
+    public List<Serie> buscarPorTitulo(String titulo) {
+        String sql = "SELECT * FROM SERIE WHERE TITULO LIKE ?";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Serie s = new Serie();
+            s.setIdMidia(rs.getInt("ID_MIDIA"));
+            s.setTitulo(rs.getString("TITULO"));
+            s.setDescricao(rs.getString("DESCRICAO"));
+            s.setPosterUrl(rs.getString("POSTER_URL"));
+            s.setNotaImdb(rs.getDouble("NOTA_IMDB"));
+            s.setQtdTemporadas(rs.getInt("QTD_TEMPORADAS"));
+            s.setAnoLancamento(rs.getInt("ANO_LANCAMENTO"));
+            s.setAvaliacao(rs.getDouble("AVALIACAO")); // Leitura para trigger
+            return s;
+        }, "%" + titulo + "%");
+    }
+
     public List<Serie> listarTodas() {
         String sql = "SELECT * FROM SERIE ORDER BY RAND()";
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
@@ -96,6 +112,7 @@ public class SerieRepository {
             s.setQtdTemporadas(rs.getInt("QTD_TEMPORADAS"));
             s.setAnoLancamento(rs.getInt("ANO_LANCAMENTO"));
             s.setGeneros(rs.getString("GENEROS"));
+            s.setAvaliacao(rs.getDouble("AVALIACAO")); // Leitura para trigger
             return s;
         }, id);
     }

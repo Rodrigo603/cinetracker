@@ -7,8 +7,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (sessao.admin) {
             response = await API.buscarAdmin(sessao.id);
+            document.getElementById('area-estatisticas').style.display = 'none';
+            document.getElementById('area-relatorio').style.display = 'none';
         } else {
             response = await API.buscarUsuario(sessao.id);
+
+            const resEstatistica = await API.buscarEstatisticasUsuario(sessao.id);
+            if (resEstatistica.ok) {
+                document.getElementById('contador-avaliacoes').innerText = await resEstatistica.json();
+            }
         }
 
         if (!response.ok) {
@@ -78,4 +85,17 @@ async function salvarPerfil(event) {
     } catch (e) {
         alert("Erro de conexão.");
     }
+}
+
+async function carregarRelatorioHistorico() {
+    const sessao = API.getSessao();
+    try {
+        const res = await API.gerarRelatorioUsuario(sessao.id);
+        if (res.ok) {
+            const texto = await res.text();
+            const pre = document.getElementById('texto-relatorio');
+            pre.innerText = texto;
+            pre.style.display = 'block';
+        }
+    } catch (e) { alert("Erro ao gerar relatório"); }
 }
