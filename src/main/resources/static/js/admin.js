@@ -93,6 +93,7 @@ function renderizarTabelaSeries(lista) {
             <td style="color:#888">${s.qtdTemporadas ?? '—'}</td>
             <td>
                 <div class="action-buttons">
+                    <button class="btn-small btn-edit"   onclick="prepararEdicaoSerie(${s.idMidia})">Editar</button>
                     <button class="btn-small btn-danger" onclick="deletarSerie(${s.idMidia})">Excluir</button>
                 </div>
             </td>`;
@@ -206,6 +207,55 @@ async function salvarEdicao(event) {
 function cancelarEdicao() {
     document.getElementById('formEditarMidia').reset();
     document.getElementById('form-editar-container').classList.add('hidden');
+    document.getElementById('form-midia-container').classList.remove('hidden');
+}
+
+function prepararEdicaoSerie(id) {
+    const serie = seriesCatalogo.find(s => s.idMidia === id);
+    if (!serie) return;
+
+    document.getElementById('editSerieId').value         = serie.idMidia;
+    document.getElementById('editSerieTitulo').value     = serie.titulo;
+    document.getElementById('editSerieDescricao').value  = serie.descricao || '';
+    document.getElementById('editSeriePoster').value     = serie.posterUrl || '';
+    document.getElementById('editSerieTemporadas').value = serie.qtdTemporadas || 1;
+    document.getElementById('editSerieAno').value        = serie.anoLancamento || '';
+
+    document.getElementById('form-midia-container').classList.add('hidden');
+    const ed = document.getElementById('form-editar-serie-container');
+    ed.classList.remove('hidden');
+    ed.classList.add('editing-mode');
+    ed.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => ed.classList.remove('editing-mode'), 2000);
+}
+
+async function salvarEdicaoSerie(event) {
+    event.preventDefault();
+    const id = document.getElementById('editSerieId').value;
+    const payload = {
+        titulo:         document.getElementById('editSerieTitulo').value,
+        descricao:      document.getElementById('editSerieDescricao').value,
+        posterUrl:      document.getElementById('editSeriePoster').value,
+        qtdTemporadas:  parseInt(document.getElementById('editSerieTemporadas').value) || 1,
+        anoLancamento:  parseInt(document.getElementById('editSerieAno').value) || null
+    };
+    try {
+        const res = await API.atualizarSerie(id, payload);
+        if (res.ok) {
+            mostrarToast('Série atualizada com sucesso!', 'success');
+            cancelarEdicaoSerie();
+            carregarSeries();
+        } else {
+            mostrarToast('Erro ao atualizar a série.', 'error');
+        }
+    } catch (err) {
+        mostrarToast('Erro de comunicação com o servidor.', 'error');
+    }
+}
+
+function cancelarEdicaoSerie() {
+    document.getElementById('formEditarSerie').reset();
+    document.getElementById('form-editar-serie-container').classList.add('hidden');
     document.getElementById('form-midia-container').classList.remove('hidden');
 }
 

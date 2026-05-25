@@ -30,6 +30,7 @@ const API = (() => {
     async function buscarSeriePorId(id)             { return _request('GET',    `/series/${id}`); }
     async function listarEpisodiosDaSerie(idSerie)  { return _request('GET',    `/series/${idSerie}/episodios`); }
     async function criarSerie(payload)              { return _request('POST',   '/admin/series', payload); }
+    async function atualizarSerie(id, payload)      { return _request('PUT',    `/admin/series/${id}`, payload); }
     async function deletarSerie(id)                 { return _request('DELETE', `/admin/series/${id}`); }
 
     async function criarAvaliacao(payload)          { return _request('POST',   '/avaliacoes', payload); }
@@ -51,7 +52,7 @@ const API = (() => {
         loginAdmin, loginUsuario, cadastrarUsuario, buscarUsuario, atualizarUsuario,
         criarAdmin, buscarAdmin, atualizarAdmin,
         listarFilmes, buscarFilmePorId, criarFilme, atualizarFilme, deletarFilme,
-        listarSeries, buscarSeriePorId, listarEpisodiosDaSerie, criarSerie, deletarSerie,
+        listarSeries, buscarSeriePorId, listarEpisodiosDaSerie, criarSerie, atualizarSerie, deletarSerie,
         criarAvaliacao, atualizarAvaliacao, deletarAvaliacao,
         listarAvaliacoesFilme, listarAvaliacoesSerie,
         deletarComentarioAdmin, listarUsuariosAdmin, buscarFilmeBackend, buscarSerieBackend,

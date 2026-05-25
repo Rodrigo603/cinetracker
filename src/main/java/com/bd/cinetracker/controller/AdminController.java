@@ -140,6 +140,16 @@ public class AdminController {
         return ResponseEntity.ok("Série e gêneros adicionados ao catálogo com sucesso!");
     }
 
+    @PutMapping("/series/{id}")
+    public ResponseEntity<String> atualizarSerie(@PathVariable Integer id, @RequestBody Serie serie) {
+        serie.setIdMidia(id);
+        int linhasAfetadas = serieRepository.atualizar(serie);
+        if (linhasAfetadas > 0) {
+            return ResponseEntity.ok("Série atualizada com sucesso!");
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @DeleteMapping("/series/{id}")
     public ResponseEntity<String> deletarSerie(@PathVariable Integer id) {
         int linhasAfetadas = serieRepository.deletar(id);

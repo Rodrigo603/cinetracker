@@ -18,6 +18,21 @@ public class SerieRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    public int atualizar(Serie serie) {
+        String sql = """
+            UPDATE SERIE
+            SET TITULO = ?, DESCRICAO = ?, POSTER_URL = ?, QTD_TEMPORADAS = ?, ANO_LANCAMENTO = ?
+            WHERE ID_MIDIA = ?
+        """;
+        return jdbcTemplate.update(sql,
+                serie.getTitulo(),
+                serie.getDescricao(),
+                serie.getPosterUrl(),
+                serie.getQtdTemporadas(),
+                serie.getAnoLancamento(),
+                serie.getIdMidia());
+    }
+
     public int deletar(Integer id) {
         return jdbcTemplate.update("DELETE FROM SERIE WHERE ID_MIDIA = ?", id);
     }
