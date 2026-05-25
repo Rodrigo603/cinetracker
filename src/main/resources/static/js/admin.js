@@ -10,11 +10,10 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarUsuarios();
 });
 
-function mudarAba(nomeAba, btnClicado) {
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+function irParaSecao(idSecao, btnClicado) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + nomeAba).classList.add('active');
     btnClicado.classList.add('active');
+    document.getElementById(idSecao).scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function mostrarToast(msg, tipo = 'success') {

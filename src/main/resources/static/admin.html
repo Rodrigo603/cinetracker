@@ -28,8 +28,8 @@
         }
         .tab-btn:hover { color: #e5e5e5; }
         .tab-btn.active { color: #e50914; border-bottom-color: #e50914; }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
+        .tab-panel { display: block; }
+        .section-anchor { scroll-margin-top: 80px; }
         .admin-grid { display: flex; flex-direction: column; gap: 24px; }
         .action-buttons { display: flex; gap: 10px; }
         .hidden { display: none; }
@@ -126,13 +126,13 @@
 <div class="content-section">
 
     <div class="tab-nav">
-        <button class="tab-btn active" onclick="mudarAba('catalogo', this)"> Catálogo</button>
-        <button class="tab-btn"        onclick="mudarAba('comentarios', this)"> Comentários</button>
-        <button class="tab-btn"        onclick="mudarAba('usuarios', this)"> Usuários</button>
-        <button class="tab-btn"        onclick="mudarAba('admins', this)"> Administradores</button>
+        <button class="tab-btn active" onclick="irParaSecao('tab-catalogo', this)"> Catálogo</button>
+        <button class="tab-btn"        onclick="irParaSecao('tab-comentarios', this)"> Comentários</button>
+        <button class="tab-btn"        onclick="irParaSecao('tab-usuarios', this)"> Usuários</button>
+        <button class="tab-btn"        onclick="irParaSecao('tab-admins', this)"> Administradores</button>
     </div>
 
-    <div id="tab-catalogo" class="tab-panel active admin-grid">
+    <div id="tab-catalogo" class="tab-panel admin-grid section-anchor">
 
         <div class="form-card" id="form-midia-container">
             <h2>Adicionar Mídia via OMDb</h2>
@@ -220,7 +220,7 @@
         </div>
     </div>
 
-    <div id="tab-comentarios" class="tab-panel admin-grid">
+    <div id="tab-comentarios" class="tab-panel admin-grid section-anchor">
         <div class="form-card">
             <div class="section-header">
                 <h2>Buscar Comentários</h2>
@@ -253,23 +253,30 @@
         </div>
     </div>
 
-    <div id="tab-usuarios" class="tab-panel admin-grid">
+    <div id="tab-usuarios" class="tab-panel admin-grid section-anchor">
         <div class="form-card">
-            <h2>Remover Conta de Usuário</h2>
-            <p style="color:#666;font-size:13px;margin-bottom:20px;">
-                Remove permanentemente um utilizador do sistema através do ID.
-            </p>
-            <div style="display:flex;gap:10px;">
-                <input type="number" id="idUsuarioExcluir" placeholder="ID do usuário (Ex: 4)" min="1"
-                       style="flex:1;padding:14px;background:#2b2b2b;border:1px solid #333;border-radius:6px;color:#fff;font-size:15px;">
-                <button class="btn-primary" style="width:auto;padding:0 28px;background:#e50914;" onclick="excluirUsuario()">
-                    Excluir Permanentemente
-                </button>
+            <div class="section-header">
+                <h2>Usuários Cadastrados</h2>
+                <span class="count-pill" id="count-usuarios">0 usuário(s)</span>
             </div>
+            <p style="color:#666;font-size:13px;margin-bottom:20px;">
+                Lista de todos os usuários do sistema. Use o botão Excluir para remover permanentemente uma conta.
+            </p>
+            <table style="table-layout:fixed;width:100%;">
+                <thead>
+                <tr>
+                    <th style="width:10%;">ID</th>
+                    <th style="width:35%;">Nome</th>
+                    <th style="width:40%;">E-mail</th>
+                    <th style="width:15%;">Ações</th>
+                </tr>
+                </thead>
+                <tbody id="listaUsuariosTbody"></tbody>
+            </table>
         </div>
     </div>
 
-    <div id="tab-admins" class="tab-panel admin-grid">
+    <div id="tab-admins" class="tab-panel admin-grid section-anchor">
         <div class="form-card">
             <h2>Adicionar Novo Administrador</h2>
             <form onsubmit="criarNovoAdmin(event)">
