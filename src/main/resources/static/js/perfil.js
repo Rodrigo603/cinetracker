@@ -80,10 +80,18 @@ async function salvarPerfil(event) {
             alert("Perfil atualizado com sucesso!");
             location.reload();
         } else {
-            alert("Erro ao atualizar perfil.");
+            // Se a resposta não for OK, lê o corpo do erro retornado pelo back-end
+            const errorText = await response.text();
+
+            // Verifica se o erro gerado pela Procedure do banco de dados está presente no texto
+            if (errorText.includes("A nova senha não pode ser igual à senha atual")) {
+                alert("Atenção: A nova senha não pode ser igual à senha atual.");
+            } else {
+                alert("Erro ao atualizar perfil. Verifique os dados e tente novamente.");
+            }
         }
     } catch (e) {
-        alert("Erro de conexão.");
+        alert("Erro de conexão com o servidor.");
     }
 }
 

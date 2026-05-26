@@ -77,8 +77,15 @@ public class SerieRepository {
         }, "%" + titulo + "%");
     }
 
+
     public List<Serie> listarTodas() {
-        String sql = "SELECT * FROM SERIE ORDER BY RAND()";
+        String sql = """
+            SELECT s.*, GROUP_CONCAT(p.NOME_GENERO SEPARATOR ', ') AS GENEROS
+            FROM SERIE s
+            LEFT JOIN PERTENCER p ON s.ID_MIDIA = p.FK_SERIE_ID_MIDIA
+            GROUP BY s.ID_MIDIA
+            ORDER BY RAND()
+        """;
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Serie s = new Serie();
             s.setIdMidia(rs.getInt("ID_MIDIA"));
@@ -87,6 +94,7 @@ public class SerieRepository {
             s.setPosterUrl(rs.getString("POSTER_URL"));
             s.setNotaImdb(rs.getDouble("NOTA_IMDB"));
             s.setQtdTemporadas(rs.getInt("QTD_TEMPORADAS"));
+            s.setGeneros(rs.getString("GENEROS")); // Campo mapeado para o front-end
             return s;
         });
     }

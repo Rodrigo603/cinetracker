@@ -50,11 +50,10 @@ public class UsuarioRepository {
     }
 
     public void atualizarPerfilCompleto(Usuario usuario, String novoTelefone) {
-        String sqlUsuario = "UPDATE USUARIO SET NOME = ?, EMAIL = ?, SENHA = ? WHERE ID_USER = ?";
+        String sqlUsuario = "UPDATE USUARIO SET NOME = ?, EMAIL = ? WHERE ID_USER = ?";
         jdbcTemplate.update(sqlUsuario,
                 usuario.getNome(),
                 usuario.getEmail(),
-                usuario.getSenha(),
                 usuario.getId()
         );
 
@@ -65,6 +64,11 @@ public class UsuarioRepository {
                     usuario.getFkTelefone()
             );
         }
+    }
+
+    public void atualizarSenha(Integer idUsuario, String novaSenha) {
+        String sql = "CALL atualizar_senha_usuario(?, ?)";
+        jdbcTemplate.update(sql, idUsuario, novaSenha);
     }
 
     public int deletar(Integer id) {

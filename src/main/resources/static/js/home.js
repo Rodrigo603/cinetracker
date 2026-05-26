@@ -1,3 +1,6 @@
+let filmesGlobais = [];
+let seriesGlobais = [];
+
 document.addEventListener("DOMContentLoaded", () => {
     const usuario = API.getSessao();
     if (!usuario) {
@@ -22,19 +25,8 @@ async function carregarFilmes() {
     try {
         const response = await API.listarFilmes();
         if (response.ok) {
-            const filmes = await response.json();
-            const container = document.getElementById('listaFilmes');
-            container.innerHTML = '';
-
-            filmes.forEach(f => {
-                const div = document.createElement('div');
-                div.className = 'poster-card';
-                div.innerHTML = `<img src="${f.posterUrl}" onerror="this.onerror=null;this.src='https://via.placeholder.com/200x300/2b2b2b/FFFFFF?text=Sem+Capa';">`;
-
-                div.addEventListener('click', () => abrirDetalhesFilme(f));
-
-                container.appendChild(div);
-            });
+            filmesGlobais = await response.json();
+            renderizarFilmes(filmesGlobais);
         }
     } catch (e) {
         console.error("Erro ao buscar filmes", e);
@@ -45,23 +37,48 @@ async function carregarSeries() {
     try {
         const response = await API.listarSeries();
         if (response.ok) {
-            const series = await response.json();
-            const container = document.getElementById('listaSeries');
-            container.innerHTML = '';
-
-            series.forEach(s => {
-                const div = document.createElement('div');
-                div.className = 'poster-card';
-                div.innerHTML = `<img src="${s.posterUrl}" onerror="this.onerror=null;this.src='https://via.placeholder.com/200x300/2b2b2b/FFFFFF?text=Sem+Capa';">`;
-
-                div.addEventListener('click', () => abrirDetalhesSerie(s));
-
-                container.appendChild(div);
-            });
+            seriesGlobais = await response.json();
+            renderizarSeries(seriesGlobais);
         }
     } catch (e) {
         console.error("Erro ao buscar séries", e);
     }
+}
+
+function renderizarFilmes(lista) {
+    const container = document.getElementById('listaFilmes');
+    container.innerHTML = '';
+
+    if (lista.length === 0) {
+        container.innerHTML = `<p style="color: #888; font-size: 15px; padding-left: 5px;">Nenhum filme correspondente.</p>`;
+        return;
+    }
+
+    lista.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'poster-card';
+        div.innerHTML = `<img src="${f.posterUrl}" onerror="this.onerror=null;this.src='https://via.placeholder.com/200x300/2b2b2b/FFFFFF?text=Sem+Capa';">`;
+        div.addEventListener('click', () => abrirDetalhesFilme(f));
+        container.appendChild(div);
+    });
+}
+
+function renderizarSeries(lista) {
+    const container = document.getElementById('listaSeries');
+    container.innerHTML = '';
+
+    if (lista.length === 0) {
+        container.innerHTML = `<p style="color: #888; font-size: 15px; padding-left: 5px;">Nenhuma série correspondente.</p>`;
+        return;
+    }
+
+    lista.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'poster-card';
+        div.innerHTML = `<img src="${s.posterUrl}" onerror="this.onerror=null;this.src='https://via.placeholder.com/200x300/2b2b2b/FFFFFF?text=Sem+Capa';">`;
+        div.addEventListener('click', () => abrirDetalhesSerie(s));
+        container.appendChild(div);
+    });
 }
 
 function abrirDetalhesFilme(f) {
@@ -72,6 +89,48 @@ function abrirDetalhesSerie(s) {
     window.location.href = `detalhes.html?id=${s.idMidia}&tipo=serie`;
 }
 
+function filtrarCatalogo(genero, btnClicado) {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.backgroundColor = '#333';
+    });
+
+    if (btnClicado) {
+        btnClicado.classList.add('active');
+        btnClicado.style.backgroundColor = '#e50914';
+    }
+
+    const tituloFilmes = document.getElementById('tituloSecaoFilmes');
+    const tituloSeries = document.getElementById('tituloSecaoSeries');
+
+    if (genero === 'Todos') {
+        tituloFilmes.innerText = 'Filmes no Catálogo';
+        tituloSeries.innerText = 'Séries no Catálogo';
+
+        renderizarFilmes(filmesGlobais);
+        renderizarSeries(seriesGlobais);
+
+        document.querySelectorAll('.row').forEach(row => row.style.display = 'block');
+    } else {
+        tituloFilmes.innerText = `Filmes de ${genero}`;
+        tituloSeries.innerText = `Séries de ${genero}`;
+
+        if (filmesGlobais.length > 0 && typeof filmesGlobais[0].generos === 'undefined') {
+            console.error("⚠️ ERRO: A propriedade 'generos' não existe nos objetos enviados pelo back-end. Certifique-se de que reiniciou o Spring Boot após atualizar os repositórios!");
+        }
+
+        const filmesFiltrados = filmesGlobais.filter(f => f.generos && f.generos.includes(genero));
+        const seriesFiltradas = seriesGlobais.filter(s => s.generos && s.generos.includes(genero));
+
+        renderizarFilmes(filmesFiltrados);
+        renderizarSeries(seriesFiltradas);
+
+        document.querySelectorAll('.row').forEach((row, index) => {
+            if (index > 1) row.style.display = 'none';
+        });
+    }
+}
+
 async function pesquisarHome() {
     const titulo = document.getElementById('inputBuscaHome').value.trim();
     if (!titulo) return;
@@ -80,63 +139,43 @@ async function pesquisarHome() {
         const btnLimpar = document.getElementById('btnLimparBusca');
         btnLimpar.style.display = 'block';
 
-        // Esconde as outras seções ("Aclamados", etc) para deixar a tela limpa
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.backgroundColor = '#333';
+        });
+        const btnTodos = document.querySelector('.filter-btn');
+        if(btnTodos) {
+            btnTodos.classList.add('active');
+            btnTodos.style.backgroundColor = '#e50914';
+        }
+
         document.querySelectorAll('.row').forEach((row, index) => {
-            if (index > 1) row.style.display = 'none'; // Index 0 e 1 são Filmes e Séries
+            if (index > 1) row.style.display = 'none';
         });
 
-        // Executa ambas as buscas simultaneamente no banco de dados
         const [resFilmes, resSeries] = await Promise.all([
             API.buscarFilmeBackend(titulo),
             API.buscarSerieBackend(titulo)
         ]);
 
-        // Processamento de Filmes
-        const containerFilmes = document.getElementById('listaFilmes');
         const tituloFilmes = document.getElementById('tituloSecaoFilmes');
-        containerFilmes.innerHTML = '';
-
         if (resFilmes.ok) {
             const filmes = await resFilmes.json();
             tituloFilmes.innerText = `Filmes encontrados para "${titulo}" (${filmes.length})`;
-            if (filmes.length === 0) {
-                containerFilmes.innerHTML = `<p style="color: #888; font-size: 15px; padding-left: 5px;">Nenhum filme correspondente.</p>`;
-            } else {
-                filmes.forEach(f => {
-                    const div = document.createElement('div');
-                    div.className = 'poster-card';
-                    div.innerHTML = `<img src="${f.posterUrl}" onerror="this.onerror=null;this.src='https://via.placeholder.com/200x300/2b2b2b/FFFFFF?text=Sem+Capa';">`;
-                    div.addEventListener('click', () => abrirDetalhesFilme(f));
-                    containerFilmes.appendChild(div);
-                });
-            }
+            renderizarFilmes(filmes);
         } else {
             tituloFilmes.innerText = `Filmes encontrados para "${titulo}" (0)`;
-            containerFilmes.innerHTML = `<p style="color: #888; font-size: 15px; padding-left: 5px;">Nenhum filme correspondente.</p>`;
+            renderizarFilmes([]);
         }
 
-        // Processamento de Séries
-        const containerSeries = document.getElementById('listaSeries');
         const tituloSeries = document.getElementById('tituloSecaoSeries');
-        containerSeries.innerHTML = '';
-
         if (resSeries.ok) {
             const series = await resSeries.json();
             tituloSeries.innerText = `Séries encontradas para "${titulo}" (${series.length})`;
-            if (series.length === 0) {
-                containerSeries.innerHTML = `<p style="color: #888; font-size: 15px; padding-left: 5px;">Nenhuma série correspondente.</p>`;
-            } else {
-                series.forEach(s => {
-                    const div = document.createElement('div');
-                    div.className = 'poster-card';
-                    div.innerHTML = `<img src="${s.posterUrl}" onerror="this.onerror=null;this.src='https://via.placeholder.com/200x300/2b2b2b/FFFFFF?text=Sem+Capa';">`;
-                    div.addEventListener('click', () => abrirDetalhesSerie(s));
-                    containerSeries.appendChild(div);
-                });
-            }
+            renderizarSeries(series);
         } else {
             tituloSeries.innerText = `Séries encontradas para "${titulo}" (0)`;
-            containerSeries.innerHTML = `<p style="color: #888; font-size: 15px; padding-left: 5px;">Nenhuma série correspondente.</p>`;
+            renderizarSeries([]);
         }
     } catch (e) {
         console.error("Erro ao realizar busca unificada:", e);
@@ -145,18 +184,10 @@ async function pesquisarHome() {
 
 function limparBuscaHome() {
     document.getElementById('inputBuscaHome').value = '';
-    document.getElementById('tituloSecaoFilmes').innerText = 'Filmes no Catálogo';
-    document.getElementById('tituloSecaoSeries').innerText = 'Séries no Catálogo';
     document.getElementById('btnLimparBusca').style.display = 'none';
-
-    // Mostra novamente todas as seções de "Explorar"
-    document.querySelectorAll('.row').forEach(row => row.style.display = 'block');
-
-    carregarFilmes();
-    carregarSeries();
+    filtrarCatalogo('Todos', document.querySelector('.filter-btn'));
 }
 
-// Atalho para pesquisar ao pressionar a tecla Enter
 document.getElementById('inputBuscaHome')?.addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
         pesquisarHome();

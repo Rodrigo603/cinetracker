@@ -13,6 +13,7 @@ async function carregarHomeMediaAlta() {
         const res = await fetch(`${API_EXPLORAR}/filmes-media-alta`);
         const dados = await res.json();
         const container = document.getElementById("home-media-alta");
+        if (!container) return;
         container.innerHTML = "";
 
         dados.forEach(f => {
@@ -27,12 +28,23 @@ async function carregarHomePorGenero(genero) {
     try {
         const res = await fetch(`${API_EXPLORAR}/filmes-por-genero/${genero}`);
         const dados = await res.json();
-        const container = document.getElementById("home-genero-acao");
+        const container = document.getElementById("home-genero-dinamico");
+        if (!container) return;
         container.innerHTML = "";
+
+        const tituloSecao = document.getElementById("titulo-genero-dinamico");
+        if (tituloSecao) {
+            tituloSecao.innerText = `Destaques em ${genero}`;
+        }
 
         dados.forEach(f => {
             container.innerHTML += criarPosterIdentico(f.idMidia, f.posterUrl, 'filme');
         });
+
+        if (dados.length === 0) {
+            container.innerHTML = `<p style='color:#ccc; padding-left:20px;'>Ainda não há filmes de ${genero} com avaliações altas.</p>`;
+        }
+
     } catch (error) {
         console.error("Erro ao carregar Por Gênero", error);
     }
@@ -43,6 +55,7 @@ async function carregarHomeSeriesMedia() {
         const res = await fetch(`${API_EXPLORAR}/series-acima-da-media`);
         const dados = await res.json();
         const container = document.getElementById("home-series-media");
+        if (!container) return;
         container.innerHTML = "";
 
         dados.forEach(s => {
@@ -64,14 +77,18 @@ async function carregarHomeSemAvaliacao() {
         const series = await resSeries.json();
 
         const container = document.getElementById("home-sem-avaliacao");
+        if (!container) return;
         container.innerHTML = "";
+
         const filmesComTipo = filmes.map(f => ({ ...f, tipoMidia: 'filme' }));
         const seriesComTipo = series.map(s => ({ ...s, tipoMidia: 'serie' }));
         let obrasMisturadas = [...filmesComTipo, ...seriesComTipo];
         obrasMisturadas.sort(() => Math.random() - 0.5);
+
         obrasMisturadas.forEach(obra => {
             container.innerHTML += criarPosterIdentico(obra.idMidia, obra.posterUrl, obra.tipoMidia);
         });
+
         if(obrasMisturadas.length === 0) {
             container.innerHTML = "<p style='color:#ccc; padding-left:20px;'>A comunidade já avaliou todo o catálogo!</p>";
         }
@@ -82,8 +99,11 @@ async function carregarHomeSemAvaliacao() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const listaGeneros = ["Ação", "Drama", "Comédia", "Ficção Científica", "Terror", "Romance", "Fantasia", "Mistério"];
+    const generoSorteado = listaGeneros[Math.floor(Math.random() * listaGeneros.length)];
+
     carregarHomeMediaAlta();
-    carregarHomePorGenero("Ação");
+    carregarHomePorGenero(generoSorteado);
     carregarHomeSeriesMedia();
     carregarHomeSemAvaliacao();
 });

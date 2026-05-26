@@ -64,7 +64,13 @@ public class FilmeRepository {
     }
 
     public List<Filme> listarTodos() {
-        String sql = "SELECT * FROM FILME ORDER BY RAND()";
+        String sql = """
+            SELECT f.*, GROUP_CONCAT(p.NOME_GENERO SEPARATOR ', ') AS GENEROS
+            FROM FILME f
+            LEFT JOIN PERTENCER p ON f.ID_MIDIA = p.FK_FILME_ID_MIDIA
+            GROUP BY f.ID_MIDIA
+            ORDER BY RAND()
+        """;
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Filme f = new Filme();
             f.setIdMidia(rs.getInt("ID_MIDIA"));
@@ -75,6 +81,7 @@ public class FilmeRepository {
             f.setNotaImdb(rs.getDouble("NOTA_IMDB"));
             f.setAnoLancamento(rs.getInt("ANO_LANCAMENTO"));
             f.setDuracao(rs.getInt("DURACAO"));
+            f.setGeneros(rs.getString("GENEROS"));
             return f;
         });
     }

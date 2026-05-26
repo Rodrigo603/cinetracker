@@ -16,8 +16,20 @@
     </div>
 </nav>
 
-<div style="display: flex; justify-content: flex-end; margin-top: 40px; margin-bottom: 20px; padding: 0 5%; width: 100%; box-sizing: border-box;">
-    <div style="display: flex; gap: 10px; max-width: 500px; width: 100%;">
+<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; margin-top: 40px; margin-bottom: 30px; padding: 0 5%; width: 100%; box-sizing: border-box; gap: 20px; flex-wrap: wrap;">
+
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="filtro-generos">
+        <button class="btn-secondary filter-btn active" onclick="filtrarCatalogo('Todos', this)" style="padding: 10px 16px; font-size: 14px; background-color: #e50914; border: none; border-radius: 4px; color: white; cursor: pointer;">Todos</button>
+        <button class="btn-secondary filter-btn" onclick="filtrarCatalogo('Ação', this)" style="padding: 10px 16px; font-size: 14px; background-color: #333; border: none; border-radius: 4px; color: white; cursor: pointer;">Ação</button>
+        <button class="btn-secondary filter-btn" onclick="filtrarCatalogo('Comédia', this)" style="padding: 10px 16px; font-size: 14px; background-color: #333; border: none; border-radius: 4px; color: white; cursor: pointer;">Comédia</button>
+        <button class="btn-secondary filter-btn" onclick="filtrarCatalogo('Drama', this)" style="padding: 10px 16px; font-size: 14px; background-color: #333; border: none; border-radius: 4px; color: white; cursor: pointer;">Drama</button>
+        <button class="btn-secondary filter-btn" onclick="filtrarCatalogo('Ficção Científica', this)" style="padding: 10px 16px; font-size: 14px; background-color: #333; border: none; border-radius: 4px; color: white; cursor: pointer;">Ficção Científica</button>
+        <button class="btn-secondary filter-btn" onclick="filtrarCatalogo('Terror', this)" style="padding: 10px 16px; font-size: 14px; background-color: #333; border: none; border-radius: 4px; color: white; cursor: pointer;">Terror</button>
+        <button class="btn-secondary filter-btn" onclick="filtrarCatalogo('Romance', this)" style="padding: 10px 16px; font-size: 14px; background-color: #333; border: none; border-radius: 4px; color: white; cursor: pointer;">Romance</button>
+        <button class="btn-secondary filter-btn" onclick="filtrarCatalogo('Fantasia', this)" style="padding: 10px 16px; font-size: 14px; background-color: #333; border: none; border-radius: 4px; color: white; cursor: pointer;">Fantasia</button>
+    </div>
+
+    <div style="display: flex; gap: 10px; max-width: 400px; width: 100%; min-width: 280px;">
         <input type="text" id="inputBuscaHome" placeholder="Buscar filmes ou séries..."
                style="flex: 1; padding: 12px 15px; background: #222; border: 1px solid #444; border-radius: 6px; color: white; font-size: 15px; outline: none;">
         <button class="btn-primary" onclick="pesquisarHome()" style="width: auto; padding: 0 20px;">Buscar</button>
@@ -41,8 +53,8 @@
 </div>
 
 <div class="row">
-    <h2 class="row-title">Melhores Críticas de Ação</h2>
-    <div class="posters" id="home-genero-acao">Carregando dados...</div>
+    <h2 class="row-title" id="titulo-genero-dinamico">Destaques por Gênero</h2>
+    <div class="posters" id="home-genero-dinamico">Carregando dados...</div>
 </div>
 
 <div class="row">

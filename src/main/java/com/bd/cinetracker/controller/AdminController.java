@@ -111,7 +111,12 @@ public class AdminController {
         serie.setDescricao(dto.descricao());
         serie.setPosterUrl(dto.posterUrl());
         serie.setIdImdb(dto.imdbId());
-        serie.setPaisOrigem(dto.pais());
+
+        // CORREÇÃO: Limitar país a 50 caracteres e pegar o primeiro da lista
+        if (dto.pais() != null && !dto.pais().equals("N/A")) {
+            String paisPrincipal = dto.pais().split(",")[0].trim();
+            serie.setPaisOrigem(paisPrincipal.length() > 50 ? paisPrincipal.substring(0, 50) : paisPrincipal);
+        }
 
         try {
             if (dto.ano() != null && !dto.ano().equals("N/A")) {
@@ -173,7 +178,12 @@ public class AdminController {
             filme.setDescricao(dto.descricao());
             filme.setPosterUrl(dto.posterUrl());
             filme.setIdImdb(dto.imdbId());
-            filme.setPaisOrigem(dto.pais());
+
+            // CORREÇÃO: Limitar país a 50 caracteres e pegar o primeiro da lista
+            if (dto.pais() != null && !dto.pais().equals("N/A")) {
+                String paisPrincipal = dto.pais().split(",")[0].trim();
+                filme.setPaisOrigem(paisPrincipal.length() > 50 ? paisPrincipal.substring(0, 50) : paisPrincipal);
+            }
 
             try {
                 if (dto.ano() != null && !dto.ano().equals("N/A")) {
@@ -213,7 +223,11 @@ public class AdminController {
             serie.setDescricao(dto.descricao());
             serie.setPosterUrl(dto.posterUrl());
             serie.setIdImdb(dto.imdbId());
-            serie.setPaisOrigem(dto.pais());
+
+            if (dto.pais() != null && !dto.pais().equals("N/A")) {
+                String paisPrincipal = dto.pais().split(",")[0].trim();
+                serie.setPaisOrigem(paisPrincipal.length() > 50 ? paisPrincipal.substring(0, 50) : paisPrincipal);
+            }
 
             try {
                 if (dto.ano() != null && !dto.ano().equals("N/A")) {
@@ -231,7 +245,6 @@ public class AdminController {
 
             Integer idSerieGerada = serieRepository.salvar(serie);
 
-            // Salvando Gêneros (SÉRIES)
             if (dto.genero() != null && !dto.genero().equals("N/A")) {
                 String[] generos = dto.genero().split(",");
                 for (String nomeGenero : generos) {
@@ -307,6 +320,7 @@ public class AdminController {
             default -> generoIngles.trim();
         };
     }
+
     @DeleteMapping("/comentarios/{idAvaliacao}")
     public ResponseEntity<String> deletarComentario(@PathVariable Integer idAvaliacao) {
         int deletados = avaliacaoRepository.deletarComoAdmin(idAvaliacao);
