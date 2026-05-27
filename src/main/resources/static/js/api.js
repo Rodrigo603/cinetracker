@@ -47,6 +47,14 @@ const API = (() => {
     async function gerarRelatorioUsuario(id)        { return _request('GET', `/usuarios/${id}/relatorio`); }
     async function buscarEstatisticasUsuario(id)    { return _request('GET', `/usuarios/${id}/estatisticas`); }
 
+    async function criarLista(payload)                            { return _request('POST',   '/listas', payload); }
+    async function listarListasDoUsuario(idUsuario)               { return _request('GET',    `/listas/usuario/${idUsuario}`); }
+    async function renomearLista(idLista, payload)                { return _request('PUT',    `/listas/${idLista}`, payload); }
+    async function deletarLista(idLista, idUsuario)               { return _request('DELETE', `/listas/${idLista}?idUsuario=${idUsuario}`); }
+    async function listarItensLista(idLista, idUsuario)           { return _request('GET',    `/listas/${idLista}/itens?idUsuario=${idUsuario}`); }
+    async function adicionarItemLista(idLista, payload)           { return _request('POST',   `/listas/${idLista}/itens`, payload); }
+    async function removerItemLista(idLista, idContem, idUsuario) { return _request('DELETE', `/listas/${idLista}/itens/${idContem}?idUsuario=${idUsuario}`); }
+
     return {
         getSessao, setSessao, encerrarSessao,
         loginAdmin, loginUsuario, cadastrarUsuario, buscarUsuario, atualizarUsuario,
@@ -56,6 +64,8 @@ const API = (() => {
         criarAvaliacao, atualizarAvaliacao, deletarAvaliacao,
         listarAvaliacoesFilme, listarAvaliacoesSerie,
         deletarComentarioAdmin, listarUsuariosAdmin, buscarFilmeBackend, buscarSerieBackend,
-        gerarRelatorioUsuario, buscarEstatisticasUsuario
+        gerarRelatorioUsuario, buscarEstatisticasUsuario,
+        criarLista, listarListasDoUsuario, renomearLista, deletarLista,
+        listarItensLista, adicionarItemLista, removerItemLista
     };
 })();

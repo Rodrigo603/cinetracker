@@ -45,6 +45,37 @@ async function carregarSeries() {
     }
 }
 
+function criarPosterCard(item, tipo) {
+    const div = document.createElement('div');
+    div.className = 'poster-card';
+
+    const id    = item.idMidia;
+    const tipoUpper = tipo === 'FILME' ? 'FILME' : 'SERIE';
+
+    div.innerHTML = `
+        <img src="${item.posterUrl}"
+             onerror="this.onerror=null;this.src='https://via.placeholder.com/200x300/2b2b2b/FFFFFF?text=Sem+Capa';">
+        <button
+            class="btn-add-lista"
+            title="Salvar na lista"
+            onclick="event.stopPropagation(); abrirModalAdicionarItem(${id}, '${tipoUpper}', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+        </button>
+    `;
+
+    div.addEventListener('click', () => {
+        if (tipo === 'FILME') abrirDetalhesFilme(item);
+        else abrirDetalhesSerie(item);
+    });
+
+    return div;
+}
+
 function renderizarFilmes(lista) {
     const container = document.getElementById('listaFilmes');
     container.innerHTML = '';
@@ -54,13 +85,7 @@ function renderizarFilmes(lista) {
         return;
     }
 
-    lista.forEach(f => {
-        const div = document.createElement('div');
-        div.className = 'poster-card';
-        div.innerHTML = `<img src="${f.posterUrl}" onerror="this.onerror=null;this.src='https://via.placeholder.com/200x300/2b2b2b/FFFFFF?text=Sem+Capa';">`;
-        div.addEventListener('click', () => abrirDetalhesFilme(f));
-        container.appendChild(div);
-    });
+    lista.forEach(f => container.appendChild(criarPosterCard(f, 'FILME')));
 }
 
 function renderizarSeries(lista) {
@@ -72,13 +97,7 @@ function renderizarSeries(lista) {
         return;
     }
 
-    lista.forEach(s => {
-        const div = document.createElement('div');
-        div.className = 'poster-card';
-        div.innerHTML = `<img src="${s.posterUrl}" onerror="this.onerror=null;this.src='https://via.placeholder.com/200x300/2b2b2b/FFFFFF?text=Sem+Capa';">`;
-        div.addEventListener('click', () => abrirDetalhesSerie(s));
-        container.appendChild(div);
-    });
+    lista.forEach(s => container.appendChild(criarPosterCard(s, 'SERIE')));
 }
 
 function abrirDetalhesFilme(f) {

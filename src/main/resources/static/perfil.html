@@ -18,6 +18,64 @@
             background: #333; color: #888; margin-top: 10px;
         }
         .admin-badge { background: #e50914; color: white; }
+
+        #area-listas { margin-top: 30px; }
+        #area-listas h3 { color: #ccc; font-weight: 500; margin-bottom: 16px; }
+
+        .lista-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .lista-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            cursor: pointer;
+        }
+        .lista-card-header:hover { background: #222; }
+        .lista-card-title { color: #fff; font-weight: bold; font-size: 15px; }
+        .lista-card-meta { color: #888; font-size: 12px; margin-top: 2px; }
+        .lista-card-actions { display: flex; gap: 8px; }
+        .btn-icon {
+            background: none; border: 1px solid #444; color: #aaa;
+            border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer;
+        }
+        .btn-icon:hover { border-color: #e50914; color: #e50914; }
+        .btn-icon.danger:hover { border-color: #e50914; background: #e50914; color: white; }
+
+        .lista-itens {
+            display: none;
+            padding: 0 16px 14px;
+            border-top: 1px solid #2a2a2a;
+        }
+        .lista-itens.aberta { display: block; }
+        .item-linha {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 0; border-bottom: 1px solid #222; color: #ccc; font-size: 14px;
+        }
+        .item-linha:last-child { border-bottom: none; }
+        .item-tipo { font-size: 11px; color: #888; margin-right: 8px; }
+        .sem-itens { color: #555; font-size: 13px; padding: 10px 0; }
+
+        .form-nova-lista {
+            background: #1a1a1a;
+            border: 1px dashed #444;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 10px;
+        }
+        .form-nova-lista .input-row {
+            display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+        }
+        .form-nova-lista input {
+            background: #111; color: #fff; border: 1px solid #444;
+            border-radius: 6px; padding: 8px 12px; font-size: 14px; flex: 1; min-width: 140px;
+        }
+        .form-nova-lista input:focus { outline: none; border-color: #e50914; }
     </style>
 </head>
 <body>
@@ -45,6 +103,22 @@
     <div class="form-card" style="margin-bottom: 20px; text-align: center;" id="area-relatorio">
         <button type="button" class="btn-primary" onclick="carregarRelatorioHistorico()" style="width: auto; padding: 10px 30px;">Gerar Histórico Completo de Avaliações</button>
         <pre id="texto-relatorio" style="display:none; background-color: #222; color: #fff; padding: 20px; margin-top: 20px; border-radius: 8px; text-align: left; overflow-x: auto; font-size: 14px; line-height: 1.6;"></pre>
+    </div>
+
+    <div class="form-card" id="area-listas">
+        <h3 style="margin-top: 0;">Minhas Listas</h3>
+
+        <div id="container-listas">
+            <p style="color: #555; font-size: 14px;">Carregando listas...</p>
+        </div>
+
+        <div class="form-nova-lista" style="margin-top: 16px;">
+            <p style="color: #aaa; font-size: 13px; margin: 0 0 10px;">Nova lista</p>
+            <div class="input-row">
+                <input type="text" id="novaListaNome" placeholder="Nome da lista" maxlength="100">
+                <button type="button" class="btn-primary" onclick="criarNovaLista()" style="width: auto; padding: 8px 20px; white-space: nowrap;">Criar</button>
+            </div>
+        </div>
     </div>
 
     <div class="form-card">

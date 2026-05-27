@@ -4,6 +4,101 @@
     <meta charset="UTF-8">
     <title>Início - CineTracker</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ── Botão + no card ── */
+        .poster-card {
+            position: relative;
+        }
+        .btn-add-lista {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(20, 20, 20, 0.85);
+            border: 1.5px solid rgba(255,255,255,0.15);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.18s ease, transform 0.18s ease, background 0.15s, border-color 0.15s;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+        }
+        .poster-card:hover .btn-add-lista {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .btn-add-lista:hover {
+            background: #e50914;
+            border-color: #e50914;
+        }
+
+        /* ── Dropdown contextual estilo Spotify ── */
+        .dropdown-lista {
+            position: fixed;
+            z-index: 99999;
+            background: #282828;
+            border-radius: 6px;
+            min-width: 220px;
+            max-height: 320px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.4);
+            animation: dropFadeIn 0.15s ease-out;
+            overflow: hidden;
+        }
+        .dropdown-lista-header {
+            padding: 10px 14px 6px;
+            color: #a7a7a7;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border-bottom: 1px solid #3a3a3a;
+            flex-shrink: 0;
+        }
+        .dropdown-lista-opcoes {
+            overflow-y: auto;
+            flex: 1;
+        }
+        .dropdown-lista-opcoes::-webkit-scrollbar { width: 4px; }
+        .dropdown-lista-opcoes::-webkit-scrollbar-thumb { background: #555; border-radius: 2px; }
+        .opcao-lista-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 14px;
+            background: none;
+            border: none;
+            color: #d4d4d4;
+            text-align: left;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .opcao-lista-item:hover {
+            background: #3a3a3a;
+            color: #fff;
+        }
+        .opcao-lista-item .icon-lista {
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        @keyframes dropFadeIn {
+            from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0)   scale(1); }
+        }
+    </style>
 </head>
 <body>
 <nav>
@@ -67,8 +162,141 @@
     <div class="posters" id="home-sem-avaliacao">Carregando dados...</div>
 </div>
 
+
 <script src="js/api.js"></script>
 <script src="js/home.js"></script>
 <script src="js/explorar.js"></script>
+<script>
+    /* ── Dropdown contextual "Adicionar à lista" ── */
+    let _dropdownEl   = null;
+    let _midiaId      = null;
+    let _midiaTipo    = null;
+
+    function fecharDropdown() {
+        if (_dropdownEl) { _dropdownEl.remove(); _dropdownEl = null; }
+        document.removeEventListener('click', _clickFora);
+        document.removeEventListener('keydown', _escFecha);
+    }
+
+    function _clickFora(e) {
+        if (_dropdownEl && !_dropdownEl.contains(e.target)) fecharDropdown();
+    }
+    function _escFecha(e) {
+        if (e.key === 'Escape') fecharDropdown();
+    }
+
+    async function abrirModalAdicionarItem(idMidia, tipoMidia, btnRef) {
+        fecharDropdown();
+
+        const sessao = API.getSessao();
+        if (!sessao || !sessao.id) { alert("Faça login para gerenciar listas."); return; }
+
+        _midiaId   = idMidia;
+        _midiaTipo = tipoMidia;
+
+        /* Cria dropdown */
+        const drop = document.createElement('div');
+        drop.className = 'dropdown-lista';
+        drop.innerHTML = `
+            <div class="dropdown-lista-header">Salvar na lista</div>
+            <div class="dropdown-lista-opcoes">
+                <button class="opcao-lista-item" disabled>
+                    <span class="icon-lista">⏳</span> Carregando…
+                </button>
+            </div>`;
+        document.body.appendChild(drop);
+        _dropdownEl = drop;
+
+        /* Posiciona próximo ao botão */
+        _posicionarDropdown(btnRef, drop);
+
+        /* Fecha ao clicar fora ou pressionar Esc */
+        setTimeout(() => {
+            document.addEventListener('click', _clickFora);
+            document.addEventListener('keydown', _escFecha);
+        }, 0);
+
+        /* Busca listas */
+        try {
+            const res = await API.listarListasDoUsuario(sessao.id);
+            const opcoes = drop.querySelector('.dropdown-lista-opcoes');
+
+            if (!res.ok) {
+                opcoes.innerHTML = `<button class="opcao-lista-item" disabled><span class="icon-lista">⚠️</span> Erro ao buscar listas.</button>`;
+                return;
+            }
+
+            const listas = await res.json();
+
+            if (listas.length === 0) {
+                opcoes.innerHTML = `<button class="opcao-lista-item" disabled style="white-space:normal;line-height:1.4">
+                    <span class="icon-lista">📭</span> Nenhuma lista criada. Crie uma no seu Perfil!
+                </button>`;
+                return;
+            }
+
+            opcoes.innerHTML = listas.map(l => `
+                <button class="opcao-lista-item" onclick="adicionarNaLista(${l.idLista})">
+                    <span class="icon-lista">📋</span> ${escDropHtml(l.nomeLista)}
+                </button>`).join('');
+
+        } catch (e) {
+            drop.querySelector('.dropdown-lista-opcoes').innerHTML =
+                `<button class="opcao-lista-item" disabled><span class="icon-lista">❌</span> Erro de conexão.</button>`;
+        }
+    }
+
+    function _posicionarDropdown(btn, drop) {
+        const rect   = btn.getBoundingClientRect();
+        const dw     = drop.offsetWidth  || 230;
+        const dh     = drop.offsetHeight || 200;
+        const margin = 6;
+
+        let top  = rect.bottom + margin;
+        let left = rect.right  - dw;
+
+        /* Não sair da janela */
+        if (top + dh > window.innerHeight - 10) top = rect.top - dh - margin;
+        if (left < 8) left = 8;
+        if (left + dw > window.innerWidth - 8) left = window.innerWidth - dw - 8;
+
+        drop.style.top  = top  + window.scrollY + 'px';
+        drop.style.left = left + window.scrollX + 'px';
+    }
+
+    async function adicionarNaLista(idLista) {
+        const sessao = API.getSessao();
+        const payload = {
+            idUsuario: sessao.id,
+            idFilme:   _midiaTipo === 'FILME' ? _midiaId : null,
+            idSerie:   _midiaTipo === 'SERIE' ? _midiaId : null
+        };
+
+        /* Feedback visual no item clicado */
+        const btn = event.currentTarget;
+        btn.innerHTML = `<span class="icon-lista">⏳</span> Salvando…`;
+        btn.disabled = true;
+
+        try {
+            const res = await API.adicionarItemLista(idLista, payload);
+            if (res.ok) {
+                btn.innerHTML = `<span class="icon-lista">✅</span> Adicionado!`;
+                setTimeout(fecharDropdown, 800);
+            } else {
+                const txt = await res.text();
+                btn.innerHTML = `<span class="icon-lista">⚠️</span> ${escDropHtml(txt) || 'Erro'}`;
+                btn.disabled = false;
+            }
+        } catch (e) {
+            btn.innerHTML = `<span class="icon-lista">❌</span> Erro de conexão`;
+            btn.disabled = false;
+        }
+    }
+
+    function escDropHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+</script>
 </body>
 </html>
