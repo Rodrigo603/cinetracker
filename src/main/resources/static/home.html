@@ -207,8 +207,8 @@
         document.body.appendChild(drop);
         _dropdownEl = drop;
 
-        /* Posiciona próximo ao botão */
-        _posicionarDropdown(btnRef, drop);
+        /* Posiciona próximo ao botão — após renderizar para ter tamanho real */
+        requestAnimationFrame(() => _posicionarDropdown(btnRef, drop));
 
         /* Fecha ao clicar fora ou pressionar Esc */
         setTimeout(() => {
@@ -249,19 +249,19 @@
     function _posicionarDropdown(btn, drop) {
         const rect   = btn.getBoundingClientRect();
         const dw     = drop.offsetWidth  || 230;
-        const dh     = drop.offsetHeight || 200;
+        const dh     = drop.offsetHeight || 160;
         const margin = 6;
 
         let top  = rect.bottom + margin;
         let left = rect.right  - dw;
 
-        /* Não sair da janela */
+        /* Não sair da viewport (position:fixed — sem scrollY/scrollX) */
         if (top + dh > window.innerHeight - 10) top = rect.top - dh - margin;
         if (left < 8) left = 8;
         if (left + dw > window.innerWidth - 8) left = window.innerWidth - dw - 8;
 
-        drop.style.top  = top  + window.scrollY + 'px';
-        drop.style.left = left + window.scrollX + 'px';
+        drop.style.top  = top  + 'px';
+        drop.style.left = left + 'px';
     }
 
     async function adicionarNaLista(idLista) {
