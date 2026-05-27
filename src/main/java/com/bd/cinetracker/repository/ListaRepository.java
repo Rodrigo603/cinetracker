@@ -89,16 +89,17 @@ public class ListaRepository {
 
     public List<java.util.Map<String, Object>> listarItens(Integer idLista) {
         String sql = """
-            SELECT c.ID_CONTEM,
-                   COALESCE(f.TITULO, s.TITULO) AS titulo,
-                   CASE WHEN c.FK_FILME_ID_MIDIA IS NOT NULL THEN 'FILME' ELSE 'SERIE' END AS tipo,
-                   COALESCE(c.FK_FILME_ID_MIDIA, c.FK_SERIE_ID_MIDIA) AS idMidia
-            FROM CONTEM c
-            LEFT JOIN FILME f ON c.FK_FILME_ID_MIDIA = f.ID_MIDIA
-            LEFT JOIN SERIE s ON c.FK_SERIE_ID_MIDIA = s.ID_MIDIA
-            WHERE c.FK_LISTA_ID_LISTA = ?
-            ORDER BY c.ID_CONTEM DESC
-        """;
+        SELECT c.ID_CONTEM,
+               COALESCE(f.TITULO, s.TITULO) AS titulo,
+               CASE WHEN c.FK_FILME_ID_MIDIA IS NOT NULL THEN 'FILME' ELSE 'SERIE' END AS tipo,
+               COALESCE(c.FK_FILME_ID_MIDIA, c.FK_SERIE_ID_MIDIA) AS idMidia,
+               COALESCE(f.POSTER_URL, s.POSTER_URL) AS urlPoster
+        FROM CONTEM c
+        LEFT JOIN FILME f ON c.FK_FILME_ID_MIDIA = f.ID_MIDIA
+        LEFT JOIN SERIE s ON c.FK_SERIE_ID_MIDIA = s.ID_MIDIA
+        WHERE c.FK_LISTA_ID_LISTA = ?
+        ORDER BY c.ID_CONTEM DESC
+    """;
         return jdbcTemplate.queryForList(sql, idLista);
     }
 
