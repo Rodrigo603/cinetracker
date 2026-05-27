@@ -106,7 +106,6 @@ async function carregarIndicadores() {
     document.getElementById("kpi-episodios").textContent = d.total_episodios.toLocaleString("pt-BR");
     document.getElementById("kpi-nota-filmes").textContent = d.media_nota_filmes.toFixed(1);
     document.getElementById("kpi-nota-series").textContent = d.media_nota_series.toFixed(1);
-    document.getElementById("kpi-plataformas").textContent = d.total_plataformas;
     document.getElementById("kpi-generos").textContent     = d.total_generos;
 
     document.getElementById("kpi-maior-filme").textContent      = d.maior_nota_filme.titulo;
@@ -357,26 +356,6 @@ async function carregarFilmesPorRegiao() {
 }
 
 
-async function carregarPorPlataforma() {
-  try {
-    const data = await fetchJson(`${API}/por-plataforma`);
-    destroyChart("plataforma");
-    const ctx = document.getElementById("chart-plataforma").getContext("2d");
-    charts["plataforma"] = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: data.map(d => d.plataforma),
-        datasets: [
-          { label: "Filmes", data: data.map(d => d.total_filmes), backgroundColor: "#e50914", borderRadius: 4 },
-          { label: "Series", data: data.map(d => d.total_series), backgroundColor: "#38bdf8", borderRadius: 4 }
-        ]
-      },
-      options: { ...defaultChartOpts, scales: { ...defaultChartOpts.scales, y: { ...defaultChartOpts.scales.y, beginAtZero: true, ticks: { color: "#7a8299", stepSize: 2 } } } }
-    });
-  } catch (e) { showToast("Erro grafico plataforma: " + e.message); }
-}
-
-
 async function carregarDashboard() {
   showLoading(true);
   try {
@@ -390,7 +369,6 @@ async function carregarDashboard() {
       carregarCorrelacao(),
       carregarFilmesPorPais(),
       carregarFilmesPorRegiao(),
-      carregarPorPlataforma(),
     ]);
   } finally {
     showLoading(false);
