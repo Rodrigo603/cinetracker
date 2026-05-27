@@ -20,62 +20,163 @@
         .admin-badge { background: #e50914; color: white; }
 
         #area-listas { margin-top: 30px; }
-        #area-listas h3 { color: #ccc; font-weight: 500; margin-bottom: 16px; }
+
+        .listas-header {
+            display: flex; align-items: center;
+            justify-content: space-between; margin-bottom: 1.25rem;
+        }
+        .listas-title { font-size: 16px; font-weight: 500; color: #fff; margin: 0; }
+        .listas-count { font-size: 13px; color: #888; }
+
+        .listas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 14px;
+            margin-bottom: 1.5rem;
+        }
 
         .lista-card {
             background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            margin-bottom: 12px;
+            border: 0.5px solid #333;
+            border-radius: 10px;
             overflow: hidden;
+            transition: border-color 0.15s, transform 0.15s;
         }
-        .lista-card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 16px;
+        .lista-card:hover { border-color: #555; transform: translateY(-2px); }
+
+        .lista-cover {
+            width: 100%; aspect-ratio: 1/1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 2px;
+            background: #111;
             cursor: pointer;
         }
-        .lista-card-header:hover { background: #222; }
-        .lista-card-title { color: #fff; font-weight: bold; font-size: 15px; }
-        .lista-card-meta { color: #888; font-size: 12px; margin-top: 2px; }
-        .lista-card-actions { display: flex; gap: 8px; }
-        .btn-icon {
-            background: none; border: 1px solid #444; color: #aaa;
-            border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer;
+        .cover-cell {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; color: #555;
+            background: #222;
+            overflow: hidden;
         }
-        .btn-icon:hover { border-color: #e50914; color: #e50914; }
-        .btn-icon.danger:hover { border-color: #e50914; background: #e50914; color: white; }
+        .cover-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-        .lista-itens {
-            display: none;
-            padding: 0 16px 14px;
-            border-top: 1px solid #2a2a2a;
+        .lista-info { padding: 10px 12px 12px; }
+        .lista-nome {
+            font-size: 14px; font-weight: 600; color: #fff;
+            margin: 0 0 3px; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
+            cursor: pointer;
         }
-        .lista-itens.aberta { display: block; }
+        .lista-nome:hover { color: #e50914; }
+        .lista-meta { font-size: 12px; color: #888; margin: 0 0 8px; }
+
+        .lista-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
+        .lista-tag {
+            font-size: 11px; padding: 2px 8px; border-radius: 20px;
+            background: #252525; color: #999; border: 0.5px solid #383838;
+        }
+
+        .lista-actions {
+            display: flex; gap: 6px;
+            border-top: 0.5px solid #2a2a2a; padding-top: 10px;
+        }
+        .btn-act-card {
+            flex: 1; font-size: 12px; padding: 5px 0;
+            border-radius: 6px; background: none;
+            border: 0.5px solid #383838; color: #999;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .btn-act-card:hover { color: #fff; border-color: #666; }
+        .btn-act-card.danger:hover { color: #e50914; border-color: #e50914; }
+
+        .lista-itens-expanded {
+            display: none;
+            background: #141414;
+            border-top: 0.5px solid #2a2a2a;
+            padding: 10px 12px;
+        }
+        .lista-itens-expanded.aberta { display: block; }
         .item-linha {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 0; border-bottom: 1px solid #222; color: #ccc; font-size: 14px;
+            padding: 7px 0; border-bottom: 0.5px solid #222;
+            color: #ccc; font-size: 13px;
         }
         .item-linha:last-child { border-bottom: none; }
-        .item-tipo { font-size: 11px; color: #888; margin-right: 8px; }
-        .sem-itens { color: #555; font-size: 13px; padding: 10px 0; }
+        .item-titulo-link {
+            color: #ccc; text-decoration: none; flex: 1;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .item-titulo-link:hover { color: #e50914; }
+        .item-tipo { font-size: 14px; margin-right: 6px; }
+        .sem-itens { color: #555; font-size: 13px; padding: 6px 0; margin: 0; }
+
+        .btn-icon {
+            background: none; border: 1px solid #444; color: #aaa;
+            border-radius: 6px; padding: 3px 8px; font-size: 11px; cursor: pointer;
+            white-space: nowrap; margin-left: 8px;
+        }
+        .btn-icon:hover { border-color: #666; color: #fff; }
+        .btn-icon.danger:hover { border-color: #e50914; background: #e50914; color: white; }
+
+        .lista-empty-state {
+            grid-column: 1 / -1; text-align: center;
+            padding: 2rem 1rem; color: #555; font-size: 14px;
+        }
 
         .form-nova-lista {
             background: #1a1a1a;
-            border: 1px dashed #444;
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 10px;
+            border: 0.5px dashed #444;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-top: 4px;
+        }
+        .form-nova-lista-label {
+            font-size: 12px; font-weight: 500; color: #888;
+            text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;
         }
         .form-nova-lista .input-row {
-            display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+            display: flex; gap: 10px; align-items: center;
         }
         .form-nova-lista input {
-            background: #111; color: #fff; border: 1px solid #444;
-            border-radius: 6px; padding: 8px 12px; font-size: 14px; flex: 1; min-width: 140px;
+            flex: 1; background: #111; color: #fff;
+            border: 0.5px solid #444; border-radius: 6px;
+            padding: 8px 12px; font-size: 14px;
         }
         .form-nova-lista input:focus { outline: none; border-color: #e50914; }
+        .btn-criar-lista {
+            white-space: nowrap; padding: 0 20px; height: 36px;
+            border-radius: 6px; background: #e50914; color: white;
+            border: none; font-size: 14px; font-weight: 500; cursor: pointer;
+            transition: background 0.15s;
+        }
+        .btn-criar-lista:hover { background: #c40812; }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75); z-index: 1000;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.aberto { display: flex; }
+        .modal-box {
+            background: #1a1a1a; border: 0.5px solid #333;
+            border-radius: 12px; width: 90%; max-width: 500px;
+            max-height: 80vh; display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; border-bottom: 0.5px solid #2a2a2a;
+        }
+        .modal-title { color: #fff; font-weight: 600; font-size: 15px; margin: 0; }
+        .modal-close {
+            background: none; border: none; color: #888; font-size: 20px;
+            cursor: pointer; padding: 0; line-height: 1;
+        }
+        .modal-close:hover { color: #fff; }
+        .modal-body { overflow-y: auto; padding: 12px 20px; flex: 1; }
     </style>
 </head>
 <body>
@@ -88,6 +189,18 @@
         <a href="#" onclick="API.encerrarSessao()">Sair</a>
     </div>
 </nav>
+
+<div class="modal-overlay" id="modal-itens">
+    <div class="modal-box">
+        <div class="modal-header">
+            <p class="modal-title" id="modal-lista-nome">Itens da lista</p>
+            <button class="modal-close" onclick="fecharModalItens()">✕</button>
+        </div>
+        <div class="modal-body" id="modal-lista-body">
+            <p class="sem-itens">Carregando...</p>
+        </div>
+    </div>
+</div>
 
 <div class="content-section">
     <div class="profile-header">
@@ -106,17 +219,20 @@
     </div>
 
     <div class="form-card" id="area-listas">
-        <h3 style="margin-top: 0;">Minhas Listas</h3>
-
-        <div id="container-listas">
-            <p style="color: #555; font-size: 14px;">Carregando listas...</p>
+        <div class="listas-header">
+            <p class="listas-title">Minhas listas</p>
+            <span class="listas-count" id="listas-count-label"></span>
         </div>
 
-        <div class="form-nova-lista" style="margin-top: 16px;">
-            <p style="color: #aaa; font-size: 13px; margin: 0 0 10px;">Nova lista</p>
+        <div class="listas-grid" id="container-listas">
+            <p style="color: #555; font-size: 14px; grid-column: 1/-1;">Carregando listas...</p>
+        </div>
+
+        <div class="form-nova-lista">
+            <p class="form-nova-lista-label">Nova lista</p>
             <div class="input-row">
                 <input type="text" id="novaListaNome" placeholder="Nome da lista" maxlength="100">
-                <button type="button" class="btn-primary" onclick="criarNovaLista()" style="width: auto; padding: 8px 20px; white-space: nowrap;">Criar</button>
+                <button type="button" class="btn-criar-lista" onclick="criarNovaLista()">Criar</button>
             </div>
         </div>
     </div>
@@ -151,5 +267,184 @@
 
 <script src="js/api.js"></script>
 <script src="js/perfil.js"></script>
+<script>
+    (function() {
+        let _modalIdLista = null;
+        let _modalNomeLista = null;
+
+        window.fecharModalItens = function() {
+            document.getElementById('modal-itens').classList.remove('aberto');
+            _modalIdLista = null;
+        };
+
+        document.getElementById('modal-itens').addEventListener('click', function(e) {
+            if (e.target === this) fecharModalItens();
+        });
+
+        window.abrirItensLista = async function(idLista, nomeLista) {
+            _modalIdLista  = idLista;
+            _modalNomeLista = nomeLista;
+
+            document.getElementById('modal-lista-nome').textContent = nomeLista;
+            document.getElementById('modal-lista-body').innerHTML =
+                '<p class="sem-itens">Carregando...</p>';
+            document.getElementById('modal-itens').classList.add('aberto');
+
+            const sessao = API.getSessao();
+            try {
+                const res = await API.listarItensLista(idLista, sessao.id);
+                if (!res.ok) {
+                    document.getElementById('modal-lista-body').innerHTML =
+                        '<p class="sem-itens">Erro ao carregar itens.</p>';
+                    return;
+                }
+                const itens = await res.json();
+                renderItensModal(idLista, itens);
+            } catch(e) {
+                document.getElementById('modal-lista-body').innerHTML =
+                    '<p class="sem-itens">Erro de conexão.</p>';
+            }
+        };
+
+        function renderItensModal(idLista, itens) {
+            const body = document.getElementById('modal-lista-body');
+            if (!itens || itens.length === 0) {
+                body.innerHTML = '<p class="sem-itens">Nenhum item nesta lista ainda.</p>';
+                return;
+            }
+            body.innerHTML = itens.map(item => {
+                const idContem  = item.ID_CONTEM ?? item.id_contem  ?? item.idContem;
+                const idMidia   = item.IDMIDIA   ?? item.idMidia    ?? item.ID_MIDIA ?? item.idmidia;
+                const tipo      = item.tipo      ?? item.TIPO;
+                const titulo    = item.titulo    ?? item.TITULO;
+                const tipoParam = tipo === 'FILME' ? 'filme' : 'serie';
+                const href      = idMidia ? `detalhes.html?id=${idMidia}&tipo=${tipoParam}` : '#';
+                return `
+                <div class="item-linha">
+                    <a href="${href}" class="item-titulo-link">
+                        <span class="item-tipo">${tipo === 'FILME' ? '🎬' : '📺'}</span>
+                        ${escHtml(titulo || '(sem título)')}
+                    </a>
+                    <button class="btn-icon danger"
+                        onclick="removerItemModal(${idLista}, ${idContem})">Remover</button>
+                </div>`;
+            }).join('');
+        }
+
+        window.removerItemModal = async function(idLista, idContem) {
+            const sessao = API.getSessao();
+            if (!confirm('Remover este item da lista?')) return;
+            try {
+                const res = await API.removerItemLista(idLista, idContem, sessao.id);
+                if (res.ok) {
+                    await carregarListas();
+                    const res2 = await API.listarItensLista(idLista, sessao.id);
+                    if (res2.ok) renderItensModal(idLista, await res2.json());
+                } else {
+                    alert('Erro ao remover item.');
+                }
+            } catch(e) {
+                alert('Erro de conexão com o servidor.');
+            }
+        };
+
+        window.excluirLista = function(idLista) {
+            confirmarExcluirLista(idLista);
+        };
+
+        const ICONS = { filme: '🎬', serie: '📺', default: '🎞️' };
+
+        function buildCover(lista) {
+            const itensLista = lista.itens ?? lista.ITENS ?? lista.items ?? lista.ITEMS;
+            const cells = [0, 1, 2, 3].map(i => {
+                const item = itensLista && itensLista[i];
+                const poster = item && (item.poster || item.POSTER || item.urlPoster || item.url_poster || item.imagem || item.IMAGEM || item.URL_POSTER || item.url_imagem || item.URL_IMAGEM);
+                if (poster) {
+                    return `<div class="cover-cell"><img src="${poster}" alt="" loading="lazy"></div>`;
+                }
+                const opacity = 1 - i * 0.22;
+                const icon = i === 0 ? (ICONS[lista.tipo ?? lista.TIPO] || ICONS.default) : '';
+                return `<div class="cover-cell" style="opacity:${opacity}">${icon}</div>`;
+            }).join('');
+            return `<div class="lista-cover" onclick="abrirItensLista(${lista.idLista || lista.id || lista._id || lista.IDLISTA}, '${escHtml(lista.nomeLista || lista.nome || lista.NOMELISTA || 'Lista')}')">${cells}</div>`;
+        }
+
+        window.renderizarListasCards = function(listas) {
+            const grid = document.getElementById('container-listas');
+            const countLabel = document.getElementById('listas-count-label');
+            if (!grid) return;
+
+            if (!listas || listas.length === 0) {
+                grid.innerHTML = '<p class="lista-empty-state">Nenhuma lista criada ainda.</p>';
+                if (countLabel) countLabel.textContent = '0 listas';
+                return;
+            }
+
+            if (countLabel) countLabel.textContent = listas.length + ' lista' + (listas.length !== 1 ? 's' : '');
+
+            grid.innerHTML = listas.map(lista => {
+                const nome  = lista.nomeLista || lista.nome || lista.name || lista.NOMELISTA || 'Lista';
+                const itensLista = lista.itens ?? lista.ITENS ?? lista.items ?? lista.ITEMS;
+                const qtd   = itensLista ? itensLista.length : (lista.quantidade ?? lista.QUANTIDADE ?? lista.qtd ?? lista.QTD ?? lista.QUANTIDADE_ITENS ?? lista.quantidade_itens ?? 0);
+                const id    = lista.idLista || lista.id || lista._id || lista.IDLISTA || '';
+
+                const tags = [];
+                const tipoLista = (lista.tipo ?? lista.TIPO ?? '').toLowerCase();
+                if (!tipoLista || tipoLista === 'filme' || tipoLista === 'misto') tags.push('🎬 Filmes');
+                if (!tipoLista || tipoLista === 'serie' || tipoLista === 'misto') tags.push('📺 Séries');
+                const tagsHtml = tags.map(t => `<span class="lista-tag">${t}</span>`).join('');
+
+                return `
+                <div class="lista-card" data-id="${id}">
+                    ${buildCover(lista)}
+                    <div class="lista-info">
+                        <p class="lista-nome" title="${escHtml(nome)}"
+                            onclick="abrirItensLista(${id}, '${escHtml(nome)}')">${escHtml(nome)}</p>
+                        <p class="lista-meta">${qtd} item${qtd !== 1 ? 's' : ''}</p>
+                        <div class="lista-tags">${tagsHtml}</div>
+                        <div class="lista-actions">
+                            <button class="btn-act-card"
+                                onclick="editarLista(${id}, '${escHtml(nome)}')">✏️ Editar</button>
+                            <button class="btn-act-card danger"
+                                onclick="confirmarExcluirLista(${id})">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        };
+
+        function patchRenderizarListas() {
+            const original = window.renderizarListas;
+            window.renderizarListas = async function(listas) {
+                const sessao = API.getSessao();
+                if (listas && listas.length > 0) {
+                    for (const lista of listas) {
+                        const idLista = lista.idLista || lista.id || lista.IDLISTA;
+                        try {
+                            const resItens = await API.listarItensLista(idLista, sessao.id);
+                            if (resItens.ok) {
+                                lista.itens = await resItens.json();
+                            } else {
+                                lista.itens = [];
+                            }
+                        } catch (err) {
+                            console.error('[Patch] Erro ao buscar itens da lista:', idLista, err);
+                            lista.itens = [];
+                        }
+                    }
+                }
+                renderizarListasCards(listas);
+            };
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', patchRenderizarListas, true);
+        } else {
+            patchRenderizarListas();
+        }
+
+        window.addEventListener('load', patchRenderizarListas);
+    })();
+</script>
 </body>
 </html>
