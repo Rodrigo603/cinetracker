@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CineTracker — Dashboard Estatístico</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="loader-ring"></div>
+  <p class="loading-text">Carregando dados do banco…</p>
+</div>
+<div class="toast" id="toast"></div>
+
+<header class="header">
+  <div class="logo">Cine<span>Tracker</span></div>
+  <div class="header-right">
+    <button class="btn-refresh" id="btn-refresh">&#x21BB; Atualizar</button>
+  </div>
+</header>
+
+<main class="main-wrapper">
+
+  <div class="filter-bar">
+    <div class="filter-group filter-group--period">
+      <label>Período de Lançamento</label>
+      <div class="period-range">
+        <select class="filter-select" id="sel-ano-inicio">
+          <option value="todos">De: todos</option>
+        </select>
+        <span class="period-sep">→</span>
+        <select class="filter-select" id="sel-ano-fim">
+          <option value="todos">Até: todos</option>
+        </select>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="section-title">INDICADORES RESUMIDOS</p>
+  <div class="kpi-grid">
+    <div class="kpi-card" style="--accent:#e50914">
+      <div class="kpi-value" id="kpi-filmes">—</div>
+      <div class="kpi-label">Total de Filmes</div>
+    </div>
+    <div class="kpi-card" style="--accent:#f5a623">
+      <div class="kpi-value" id="kpi-series">—</div>
+      <div class="kpi-label">Total de Séries</div>
+    </div>
+    <div class="kpi-card" style="--accent:#a78bfa">
+      <div class="kpi-value" id="kpi-usuarios">—</div>
+      <div class="kpi-label">Usuários</div>
+    </div>
+    <div class="kpi-card" style="--accent:#4ecdc4">
+      <div class="kpi-value" id="kpi-episodios">—</div>
+      <div class="kpi-label">Total de Episódios</div>
+    </div>
+    <div class="kpi-card" style="--accent:#38bdf8">
+      <div class="kpi-value" id="kpi-nota-filmes">—</div>
+      <div class="kpi-label">Média Filmes IMDb</div>
+    </div>
+    <div class="kpi-card" style="--accent:#34d399">
+      <div class="kpi-value" id="kpi-nota-series">—</div>
+      <div class="kpi-label">Média Séries IMDb</div>
+    </div>
+    <div class="kpi-card" style="--accent:#fb7185">
+      <div class="kpi-value" id="kpi-plataformas">—</div>
+      <div class="kpi-label">Plataformas</div>
+    </div>
+    <div class="kpi-card" style="--accent:#fbbf24">
+      <div class="kpi-value" id="kpi-generos">—</div>
+      <div class="kpi-label">Gêneros Cadastrados</div>
+    </div>
+  </div>
+
+  <div class="kpi-extremos-grid">
+    <div class="extremo-card extremo-top">
+      <div class="extremo-label">Maior nota — Filme</div>
+      <div class="extremo-titulo" id="kpi-maior-filme">—</div>
+      <div class="extremo-nota" id="kpi-maior-filme-nota">—</div>
+    </div>
+    <div class="extremo-card extremo-bot">
+      <div class="extremo-label">Menor nota — Filme</div>
+      <div class="extremo-titulo" id="kpi-menor-filme">—</div>
+      <div class="extremo-nota" id="kpi-menor-filme-nota">—</div>
+    </div>
+    <div class="extremo-card extremo-top">
+      <div class="extremo-label">Maior nota — Série</div>
+      <div class="extremo-titulo" id="kpi-maior-serie">—</div>
+      <div class="extremo-nota" id="kpi-maior-serie-nota">—</div>
+    </div>
+    <div class="extremo-card extremo-bot">
+      <div class="extremo-label">Menor nota — Série</div>
+      <div class="extremo-titulo" id="kpi-menor-serie">—</div>
+      <div class="extremo-nota" id="kpi-menor-serie-nota">—</div>
+    </div>
+  </div>
+
+  <p class="section-title">ANALISES GRAFICAS</p>
+  <div class="charts-grid">
+
+    <div class="chart-card col-8">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title" id="titulo-genero">Filmes por Gênero</div>
+          <div class="chart-subtitle">Quantidade por categoria — filtrado por ano</div>
+        </div>
+        <div class="chart-controls">
+          <button class="btn-tab btn-tipo-genero active" data-tipo="filme">Filmes</button>
+          <button class="btn-tab btn-tipo-genero" data-tipo="serie">Séries</button>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:280px">
+        <canvas id="chart-genero"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card col-4">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Distribuição de Notas IMDb</div>
+          <div class="chart-subtitle">Faixas de classificação</div>
+        </div>
+        <div class="chart-controls">
+          <button class="btn-tab btn-tipo-dist active" data-tipo="filme">Filmes</button>
+          <button class="btn-tab btn-tipo-dist" data-tipo="serie">Séries</button>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:280px">
+        <canvas id="chart-pizza"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="charts-grid">
+
+    <div class="chart-card col-8">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Lançamentos por Ano</div>
+          <div class="chart-subtitle">Quantidade e média IMDb ao longo do tempo</div>
+        </div>
+        <div class="chart-controls">
+          <button class="btn-tab btn-tipo-lancamento active" data-tipo="filme">Filmes</button>
+          <button class="btn-tab btn-tipo-lancamento" data-tipo="serie">Séries</button>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:270px">
+        <canvas id="chart-linha"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card col-4">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Estatísticas Descritivas</div>
+          <div class="chart-subtitle">Média · Mediana · Moda · Var · DP</div>
+        </div>
+        <div class="chart-controls">
+          <button class="btn-tab btn-tipo-nota active" data-tipo="filme">Filmes</button>
+          <button class="btn-tab btn-tipo-nota" data-tipo="serie">Séries</button>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="chart-radar"></canvas>
+      </div>
+      <div class="stat-badges">
+        <div class="stat-badge"><div class="s-val" id="stat-media">—</div><div class="s-lbl">Media</div></div>
+        <div class="stat-badge"><div class="s-val" id="stat-mediana">—</div><div class="s-lbl">Mediana</div></div>
+        <div class="stat-badge"><div class="s-val" id="stat-moda">—</div><div class="s-lbl">Moda</div></div>
+        <div class="stat-badge"><div class="s-val" id="stat-variancia">—</div><div class="s-lbl">Variancia</div></div>
+        <div class="stat-badge"><div class="s-val" id="stat-dp">—</div><div class="s-lbl">Desv. Padrao</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="charts-grid">
+
+    <div class="chart-card col-6">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Top 10 Bilheteria</div>
+          <div class="chart-subtitle">Filmes com maior arrecadação</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:340px">
+        <canvas id="chart-bilheteria"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card col-6">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Correlação: Nota IMDb x Bilheteria</div>
+          <div class="chart-subtitle">Cada ponto é um filme — passe o mouse para detalhes</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:340px">
+        <canvas id="chart-correlacao"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="charts-grid">
+
+    <div class="chart-card col-6">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Filmes por País de Origem</div>
+          <div class="chart-subtitle">Quantidade de filmes por país</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:300px">
+        <canvas id="chart-pais"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card col-6">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Filmes por Região do Mundo</div>
+          <div class="chart-subtitle">Distribuição geográfica do catálogo</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:300px">
+        <canvas id="chart-regiao"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="charts-grid">
+
+    <div class="chart-card col-12">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Conteúdo por Plataforma</div>
+          <div class="chart-subtitle">Filmes e séries disponíveis em cada serviço de streaming</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:260px">
+        <canvas id="chart-plataforma"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer class="footer">
+  CineTracker Dashboard &mdash; Dados integrados via MySQL + Flask API &mdash; <strong>Chart.js</strong>
+</footer>
+
+<script src="js/dashboard.js"></script>
+</body>
+</html>
