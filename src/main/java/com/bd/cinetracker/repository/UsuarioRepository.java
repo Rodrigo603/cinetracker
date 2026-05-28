@@ -67,7 +67,7 @@ public class UsuarioRepository {
     }
 
     public void atualizarSenha(Integer idUsuario, String novaSenha) {
-        String sql = "CALL atualizar_senha_usuario(?, ?)";
+        String sql = "CALL atualizar_senha_usuario(?, ?,'USER')";
         jdbcTemplate.update(sql, idUsuario, novaSenha);
     }
 

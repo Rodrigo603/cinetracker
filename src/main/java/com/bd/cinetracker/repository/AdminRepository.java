@@ -66,6 +66,11 @@ public class AdminRepository {
         }
     }
 
+    public void atualizarSenha(Integer idUsuario, String novaSenha) {
+        String sql = "CALL atualizar_senha_usuario(?, ?,'ADMIN')";
+        jdbcTemplate.update(sql, idUsuario, novaSenha);
+    }
+
     public Admin buscarPorEmail(String email) {
         String sql = "SELECT * FROM ADMIN WHERE EMAIL = ?";
         try {

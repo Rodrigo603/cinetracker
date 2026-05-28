@@ -78,12 +78,19 @@ public class AdminController {
             return ResponseEntity.notFound().build();
         }
 
+        if (request.senha() != null && !request.senha().trim().isEmpty()) {
+            try {
+                adminRepository.atualizarSenha(id, request.senha());
+            } catch (Exception e) {
+                if (e.getMessage() != null && e.getMessage().contains("igual")) {
+                    return ResponseEntity.badRequest().body("A nova senha não pode ser igual à senha atual.");
+                }
+                return ResponseEntity.internalServerError().body("Erro interno ao tentar alterar a senha.");
+            }
+        }
+
         adminExistente.setNome(request.nome());
         adminExistente.setEmail(request.email());
-
-        if (request.senha() != null && !request.senha().trim().isEmpty()) {
-            adminExistente.setSenha(request.senha());
-        }
 
         adminRepository.atualizarPerfilCompleto(adminExistente, request.telefone());
         return ResponseEntity.ok("Perfil atualizado com sucesso!");
