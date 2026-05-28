@@ -3,8 +3,7 @@ from flask import Flask, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 
-load_dotenv()
-
+load_dotenv(override=True)
 from routes.dashboard import dashboard_bp
 
 app = Flask(
