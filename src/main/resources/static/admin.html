@@ -130,6 +130,7 @@
         <button class="tab-btn"        onclick="irParaSecao('tab-comentarios', this)"> Comentários</button>
         <button class="tab-btn"        onclick="irParaSecao('tab-usuarios', this)"> Usuários</button>
         <button class="tab-btn"        onclick="irParaSecao('tab-admins', this)"> Administradores</button>
+        <button class="tab-btn"        onclick="abrirDashboard()"> Dashboard</button>
     </div>
 
     <div id="tab-catalogo" class="tab-panel admin-grid section-anchor">
@@ -326,5 +327,10 @@
 
 <script src="js/api.js"></script>
 <script src="js/admin.js"></script>
+<script>
+    function abrirDashboard() {
+        window.open('http://localhost:5000', '_blank');
+    }
+</script>
 </body>
 </html>
