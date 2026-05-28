@@ -64,7 +64,6 @@ tr:hover td { background-color: #222; }
 .action-buttons { display: flex; gap: 8px; }
 .hidden { display: none; }
 
-
 .season-selector {
     background-color: #2b2b2b;
     color: white;
@@ -78,14 +77,34 @@ tr:hover td { background-color: #222; }
     outline: none;
     width: 100%;
     max-width: 300px;
-    appearance: none; /* Remove a setinha padrão de alguns navegadores */
+    appearance: none;
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
     background-repeat: no-repeat;
     background-position: right 15px center;
     background-size: 18px;
 }
+.season-selector:focus { border-color: #e50914; background-color: #333; }
 
-.season-selector:focus {
-    border-color: #e50914;
-    background-color: #333;
+/* Interações da Avaliação */
+.btn-interacao {
+    background: none; border: none; color: #888; cursor: pointer; font-size: 14px;
+    display: inline-flex; align-items: center; gap: 5px; transition: color 0.2s; margin-right: 15px;
 }
+.btn-interacao:hover { color: #fff; }
+.btn-interacao.curtido { color: #e50914; }
+
+.comentarios-container {
+    margin-top: 15px; padding-top: 15px; border-top: 1px dashed #333; margin-left: 10px;
+}
+.comentario-reply-item {
+    background: #1a1a1a; padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; color: #ccc;
+}
+.comentario-reply-item strong { color: #fff; margin-right: 5px; }
+.form-comentario-reply { display: flex; gap: 8px; margin-top: 10px; }
+.form-comentario-reply input {
+    flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; outline: none;
+}
+.form-comentario-reply button {
+    background: #444; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;
+}
+.form-comentario-reply button:hover { background: #666; }

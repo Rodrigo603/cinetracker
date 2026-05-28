@@ -36,10 +36,24 @@ const API = (() => {
     async function criarAvaliacao(payload)          { return _request('POST',   '/avaliacoes', payload); }
     async function atualizarAvaliacao(id, payload)  { return _request('PUT',    `/avaliacoes/${id}`, payload); }
     async function deletarAvaliacao(id, idUsuario)  { return _request('DELETE', `/avaliacoes/${id}?idUsuario=${idUsuario}`); }
-    async function listarAvaliacoesFilme(id)        { return _request('GET',    `/avaliacoes/filme/${id}`); }
-    async function listarAvaliacoesSerie(id)        { return _request('GET',    `/avaliacoes/serie/${id}`); }
-    async function deletarComentarioAdmin(id)       { return _request('DELETE', `/admin/comentarios/${id}`); }
 
+    async function listarAvaliacoesFilme(id, idUsuarioLogado) {
+        let url = `/avaliacoes/filme/${id}`;
+        if (idUsuarioLogado) url += `?idUsuarioLogado=${idUsuarioLogado}`;
+        return _request('GET', url);
+    }
+
+    async function listarAvaliacoesSerie(id, idUsuarioLogado) {
+        let url = `/avaliacoes/serie/${id}`;
+        if (idUsuarioLogado) url += `?idUsuarioLogado=${idUsuarioLogado}`;
+        return _request('GET', url);
+    }
+
+    async function curtirAvaliacao(idAvaliacao, idUsuario) { return _request('POST', `/avaliacoes/${idAvaliacao}/curtir?idUsuario=${idUsuario}`); }
+    async function listarComentariosAvaliacao(idAvaliacao) { return _request('GET', `/avaliacoes/${idAvaliacao}/comentarios`); }
+    async function comentarAvaliacao(idAvaliacao, idUsuario, texto) { return _request('POST', `/avaliacoes/${idAvaliacao}/comentarios`, { idUsuario, texto }); }
+
+    async function deletarComentarioAdmin(id)       { return _request('DELETE', `/admin/comentarios/${id}`); }
     async function listarUsuariosAdmin()            { return _request('GET', '/admin/usuarios'); }
     async function buscarFilmeBackend(titulo)       { return _request('GET', `/filmes/buscar?titulo=${encodeURIComponent(titulo)}`); }
     async function buscarSerieBackend(titulo)       { return _request('GET', `/series/buscar?titulo=${encodeURIComponent(titulo)}`); }
@@ -54,6 +68,9 @@ const API = (() => {
     async function listarItensLista(idLista, idUsuario)           { return _request('GET',    `/listas/${idLista}/itens?idUsuario=${idUsuario}`); }
     async function adicionarItemLista(idLista, payload)           { return _request('POST',   `/listas/${idLista}/itens`, payload); }
     async function removerItemLista(idLista, idContem, idUsuario) { return _request('DELETE', `/listas/${idLista}/itens/${idContem}?idUsuario=${idUsuario}`); }
+    async function atualizarComentarioResp(idComentario, payload) { return _request('PUT', `/avaliacoes/comentarios/${idComentario}`, payload); }
+    async function deletarComentarioResp(idComentario, idUsuario, isAdmin) {
+    return _request('DELETE', `/avaliacoes/comentarios/${idComentario}?idUsuario=${idUsuario}&admin=${isAdmin}`); }
 
     async function getStreaming(imdbId, tipo) {
         const response = await fetch(`/streaming/${tipo}/${imdbId}`);
@@ -69,10 +86,11 @@ const API = (() => {
         listarSeries, buscarSeriePorId, listarEpisodiosDaSerie, criarSerie, atualizarSerie, deletarSerie,
         criarAvaliacao, atualizarAvaliacao, deletarAvaliacao,
         listarAvaliacoesFilme, listarAvaliacoesSerie,
+        curtirAvaliacao, listarComentariosAvaliacao, comentarAvaliacao,
         deletarComentarioAdmin, listarUsuariosAdmin, buscarFilmeBackend, buscarSerieBackend,
         gerarRelatorioUsuario, buscarEstatisticasUsuario,
         criarLista, listarListasDoUsuario, renomearLista, deletarLista,
         listarItensLista, adicionarItemLista, removerItemLista,
-        getStreaming
+        getStreaming, atualizarComentarioResp, deletarComentarioResp,
     };
 })();
