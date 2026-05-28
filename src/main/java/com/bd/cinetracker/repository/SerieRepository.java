@@ -66,6 +66,7 @@ public class SerieRepository {
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Serie s = new Serie();
             s.setIdMidia(rs.getInt("ID_MIDIA"));
+            s.setIdImdb(rs.getString("ID_IMDB"));
             s.setTitulo(rs.getString("TITULO"));
             s.setDescricao(rs.getString("DESCRICAO"));
             s.setPosterUrl(rs.getString("POSTER_URL"));
@@ -128,6 +129,7 @@ public class SerieRepository {
         return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
             Serie s = new Serie();
             s.setIdMidia(rs.getInt("ID_MIDIA"));
+            s.setIdImdb(rs.getString("ID_IMDB"));
             s.setTitulo(rs.getString("TITULO"));
             s.setDescricao(rs.getString("DESCRICAO"));
             s.setPosterUrl(rs.getString("POSTER_URL"));

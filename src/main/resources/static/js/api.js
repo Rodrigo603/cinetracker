@@ -55,6 +55,12 @@ const API = (() => {
     async function adicionarItemLista(idLista, payload)           { return _request('POST',   `/listas/${idLista}/itens`, payload); }
     async function removerItemLista(idLista, idContem, idUsuario) { return _request('DELETE', `/listas/${idLista}/itens/${idContem}?idUsuario=${idUsuario}`); }
 
+    async function getStreaming(imdbId, tipo) {
+        const response = await fetch(`/streaming/${tipo}/${imdbId}`);
+        if (!response.ok) throw new Error('Streaming não encontrado');
+        return response.json();
+    }
+
     return {
         getSessao, setSessao, encerrarSessao,
         loginAdmin, loginUsuario, cadastrarUsuario, buscarUsuario, atualizarUsuario,
@@ -66,6 +72,7 @@ const API = (() => {
         deletarComentarioAdmin, listarUsuariosAdmin, buscarFilmeBackend, buscarSerieBackend,
         gerarRelatorioUsuario, buscarEstatisticasUsuario,
         criarLista, listarListasDoUsuario, renomearLista, deletarLista,
-        listarItensLista, adicionarItemLista, removerItemLista
+        listarItensLista, adicionarItemLista, removerItemLista,
+        getStreaming
     };
 })();

@@ -79,6 +79,8 @@ async function carregarFilme(id) {
                 <span class="detalhes-tag-item" style="background:#e50914;">⭐ IMDb: ${filme.notaImdb}</span>
                 <span class="detalhes-tag-item" style="background:#e50914;">🎬 CineTracker: ${Number(filme.avaliacao || 0).toFixed(1)}</span>
             `;
+
+            await buscarEExibirStreamings(filme.idImdb, 'filme');
         }
     } catch (e) {
         console.error("Erro ao carregar filme:", e);
@@ -104,9 +106,69 @@ async function carregarSerie(id) {
             `;
 
             carregarEpisodios(id);
+            await buscarEExibirStreamings(serie.idImdb, 'serie');
         }
     } catch (e) {
         console.error("Erro ao carregar série:", e);
+    }
+}
+
+async function buscarEExibirStreamings(imdbId, tipo) {
+    const section = document.getElementById('streamingSection');
+    const container = document.getElementById('listaStreamings');
+
+    section.style.display = 'block';
+    container.innerHTML = '<span style="color: #ccc; font-size: 14px;">A procurar streamings...</span>';
+
+    try {
+        const streamings = await API.getStreaming(imdbId, tipo);
+        let plataformas = [];
+
+        if (streamings && streamings.flatrate) {
+            plataformas.push(...streamings.flatrate);
+        }
+
+        let unicos = Array.from(new Set(plataformas.map(p => p.provider_id)))
+                            .map(id => plataformas.find(p => p.provider_id === id));
+
+        const permitidos = [
+            "netflix", "amazon prime video", "max", "hbo max", "disney plus", "disney+",
+            "apple tv plus", "apple tv+", "globoplay", "paramount plus", "paramount+",
+            "crunchyroll", "mubi", "mercado play"
+        ];
+
+        unicos = unicos.filter(p => permitidos.includes(p.provider_name.toLowerCase()));
+
+        if (unicos.length > 0) {
+            container.innerHTML = '';
+
+            unicos.forEach(p => {
+                const link = document.createElement('a');
+                link.href = streamings.link || '#';
+                link.target = '_blank';
+
+                const img = document.createElement('img');
+                img.src = `https://image.tmdb.org/t/p/original${p.logo_path}`;
+                img.title = p.provider_name;
+                img.alt = p.provider_name;
+                img.style.width = '45px';
+                img.style.height = '45px';
+                img.style.borderRadius = '10px';
+                img.style.boxShadow = '0 2px 5px rgba(0,0,0,0.5)';
+                img.style.transition = 'transform 0.2s';
+                img.style.cursor = 'pointer';
+
+                img.onmouseover = () => img.style.transform = 'scale(1.1)';
+                img.onmouseout = () => img.style.transform = 'scale(1)';
+
+                link.appendChild(img);
+                container.appendChild(link);
+            });
+        } else {
+            container.innerHTML = '<span style="color: #888; font-size: 15px; font-style: italic;">Não disponível em assinaturas conhecidas no momento.</span>';
+        }
+    } catch (e) {
+        container.innerHTML = '<span style="color: #888; font-size: 15px; font-style: italic;">Não disponível em assinaturas conhecidas no momento.</span>';
     }
 }
 
