@@ -44,15 +44,54 @@ Você deve copiar tudo que está escrito no arquivo e criar outro chamado *appli
 
 *AVISO* CASO SEU LOCAL HOST NÃO SEJA 3306 (padrão) altere! (está sublinhado de vermelho)
 
-### 3. Rodando a Aplicação:
-Depois de criar o arquivo *application.properties* e realizar as mudanças necessárias, abra a pasta *main* e depois a *java* e rode o arquivo *CinetrackerApplication.java*.
+Depois, deve accesar a pasta *dashboard* e realizar as seguintes ações:
 
-<img width="445" height="504" alt="image" src="https://github.com/user-attachments/assets/85d2a77d-d10d-40f4-8c21-7927aa581ee6" />
+<img width="347" height="360" alt="Captura de tela 2026-05-28 004450" src="https://github.com/user-attachments/assets/1cdc9047-1789-4ad9-abfe-b0da2101e5af" />
+
+1. criação da .env com base no exemplo:
+```.env.example
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=SEU_USUÁRIO
+DB_PASSWORD=SUA_SENHA
+DB_NAME=SEU_BANCO_DE_DADOS
+
+FLASK_ENV=development
+FLASK_DEBUG=True
+SECRET_KEY=SUA_CHAVE_SECRETA
+```
+
+2. Depois disso, deve digitar os seguintes comandos no terminal: 
+```
+- cd dashboard
+- criar venv: python -m venv venv
+- ativar venv: source venv/bin/activate      # ou venv\Scripts\activate no Windows
+- pip install -r requirements.txt
+```
+
+
+
+
+### 3. Rodando a Aplicação:
+Depois de criar o arquivo *application.properties*, *.env*, e instalar tudo do requirements.txt corretamente, insira no terminal:
+```
+.\start.bat
+```
 
 Depois disso basta rodar localmente o site com o link "http://localhost:8080/index.html":
 
 <img width="1919" height="1026" alt="image" src="https://github.com/user-attachments/assets/dac336e3-9349-4048-a6c6-f73eb06bc6cc" />
 
-AO SE CADASTRAR E ENTRAR COM SUA CONTA:
+Ao realizar login, já pode utilizar a aplicação:
 
-<img width="1913" height="1028" alt="image" src="https://github.com/user-attachments/assets/fc8eb853-229a-4b24-b1df-b22467a43b8a" />
+<img width="1346" height="629" alt="Captura de tela 2026-05-28 011048" src="https://github.com/user-attachments/assets/56502b71-9df6-4adf-bfe4-557c35651718" />
+
+Ao acessar como admin, é possível acessar o dashboard:
+
+<img width="1349" height="623" alt="Captura de tela 2026-05-28 011610" src="https://github.com/user-attachments/assets/fe934be7-49ba-4a30-89c1-1231ee300e5e" />
+
+E é possível visualizar o dashboard: 
+
+<img width="1352" height="624" alt="Captura de tela 2026-05-28 011807" src="https://github.com/user-attachments/assets/7edf8a4a-5d21-4955-ae44-2b7205482069" />
+
+
